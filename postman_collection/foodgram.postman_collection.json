@@ -241,7 +241,7 @@
 											"pm.test(\"Статус-код ответа должен быть 200\", function () {",
 											"    pm.expect(",
 											"        pm.response.status,",
-											"        \"Убедитесь, что запроc на получение токена, содержащий корректные данные, возвращает ответ со статус-кодом 200\"",
+											"        \"Убедитесь, что корректный запроc на получение токена возвращает ответ со статус-кодом 200\"",
 											"    ).to.be.eql(\"OK\");",
 											"});",
 											"pm.test('Структура ответа соответствует ожидаемой', function () {",
@@ -307,7 +307,7 @@
 											"pm.test(\"Статус-код ответа должен быть 200\", function () {",
 											"    pm.expect(",
 											"        pm.response.status,",
-											"        \"Убедитесь, что запроc на получение токена, содержащий корректные данные, возвращает ответ со статус-кодом 200\"",
+											"        \"Убедитесь, что корректный запроc на получение токена возвращает ответ со статус-кодом 200\"",
 											"    ).to.be.eql(\"OK\");",
 											"});",
 											"pm.test('Структура ответа соответствует ожидаемой', function () {",
@@ -1148,7 +1148,7 @@
 											"pm.test(\"Статус-код ответа должен быть 200\", function () {",
 											"    pm.expect(",
 											"        pm.response.status,",
-											"        \"Убедитесь, что запроc на получение токена, содержащий корректные данные, возвращает ответ со статус-кодом 200\"",
+											"        \"Убедитесь, что корректный запроc на получение токена возвращает ответ со статус-кодом 200\"",
 											"    ).to.be.eql(\"OK\");",
 											"});",
 											"pm.test('Структура ответа соответствует ожидаемой', function () {",
@@ -1749,7 +1749,7 @@
 										}
 									]
 								},
-								"method": "PATCH",
+								"method": "PUT",
 								"header": [],
 								"body": {
 									"mode": "raw",
@@ -1761,14 +1761,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/api/users/set-avatar/",
+									"raw": "{{baseUrl}}/api/users/me/avatar/",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"api",
 										"users",
-										"set-avatar",
+										"me",
+										"avatar",
 										""
 									]
 								}
@@ -1776,7 +1777,7 @@
 							"response": []
 						},
 						{
-							"name": "check_avatar_is_set // User Copy",
+							"name": "check_avatar_is_set // User",
 							"event": [
 								{
 									"listen": "test",
@@ -2064,7 +2065,7 @@
 											"pm.test(\"Статус-код ответа должен быть 200\", function () {",
 											"    pm.expect(",
 											"        pm.response.status,",
-											"        \"Убедитесь, что корректный запроc на получение токена возвращает ответ со статус-кодом 200\"",
+											"        \"Убедитесь, что запроc на получение токена, содержащий корректные данные, возвращает ответ со статус-кодом 200\"",
 											"    ).to.be.eql(\"OK\");",
 											"});",
 											"pm.test('Структура ответа соответствует ожидаемой', function () {",
@@ -2300,14 +2301,15 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/api/users/delete-avatar/",
+									"raw": "{{baseUrl}}/api/users/me/avatar/",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"api",
 										"users",
-										"delete-avatar",
+										"me",
+										"avatar",
 										""
 									]
 								}
@@ -2337,7 +2339,7 @@
 								"auth": {
 									"type": "noauth"
 								},
-								"method": "PATCH",
+								"method": "PUT",
 								"header": [],
 								"body": {
 									"mode": "raw",
@@ -2349,14 +2351,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/api/users/set-avatar/",
+									"raw": "{{baseUrl}}/api/users/me/avatar/",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"api",
 										"users",
-										"set-avatar",
+										"me",
+										"avatar",
 										""
 									]
 								}
@@ -2397,7 +2400,7 @@
 										}
 									]
 								},
-								"method": "PATCH",
+								"method": "PUT",
 								"header": [],
 								"body": {
 									"mode": "raw",
@@ -2409,14 +2412,15 @@
 									}
 								},
 								"url": {
-									"raw": "{{baseUrl}}/api/users/set-avatar/",
+									"raw": "{{baseUrl}}/api/users/me/avatar/",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"api",
 										"users",
-										"set-avatar",
+										"me",
+										"avatar",
 										""
 									]
 								}
@@ -2466,14 +2470,15 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{baseUrl}}/api/users/delete-avatar/",
+									"raw": "{{baseUrl}}/api/users/me/avatar/",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"api",
 										"users",
-										"delete-avatar",
+										"me",
+										"avatar",
 										""
 									]
 								}
@@ -11037,7 +11042,7 @@
 		},
 		{
 			"key": "username",
-			"value": "\"vasya.pupkin\"",
+			"value": "\"vasya.ivanov\"",
 			"type": "string"
 		},
 		{
@@ -11047,7 +11052,7 @@
 		},
 		{
 			"key": "email",
-			"value": "\"vpupkin@yandex.ru\"",
+			"value": "\"vivanov@yandex.ru\"",
 			"type": "string"
 		},
 		{
