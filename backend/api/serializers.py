@@ -1,10 +1,11 @@
-import djoser.serializers
 from django.shortcuts import get_object_or_404
-from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
 from rest_framework.validators import UniqueTogetherValidator
+
+from djoser.serializers import UserSerializer
+from drf_extra_fields.fields import Base64ImageField
 
 from recipes.models import (Favorite, Ingredient, IngredientToRecipe,
                             Recipe, ShopList, Tag)
@@ -40,7 +41,6 @@ class UserCreateSerializer(djoser.serializers.UserCreateSerializer):
             'email', 'username', 'first_name',
             'last_name', 'password', 'avatar')
 
-
     class UserUpdateSerializer(serializers.ModelSerializer):
         avatar = Base64ImageField(max_length=None, use_url=True)
 
@@ -75,9 +75,15 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         author = get_object_or_404(User, id=author_id)
         user = request.user
         if user.subscriptions.filter(author=author_id).exists():
-            raise ValidationError('Вы уже подписаны', code=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError(
+                'Вы уже подписаны',
+                code=status.HTTP_400_BAD_REQUEST
+            )
         if user == author:
-            raise ValidationError('Ты не можешь подписаться на себя', code=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError(
+                'Ты не можешь подписаться на себя',
+                code=status.HTTP_400_BAD_REQUEST
+            )
         return data
 
     def get_recipes_count(self, obj):
