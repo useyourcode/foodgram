@@ -32,7 +32,7 @@ services:
       - backend
   gateway:
     container_name: nginx_prod
-    image: onedocforall/foodgram_gateway
+    image: onedocforall/foodgram_nginx
     env_file: .env
     volumes:
       - static:/static/
