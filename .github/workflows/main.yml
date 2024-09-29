@@ -120,8 +120,9 @@ jobs:
           sleep 10
           sudo docker compose -f docker-compose.production.yml exec backend bash -c "
             cd /app &&
-            python manage.py makemigrations users
+            python manage.py makemigrations users &&
             python manage.py migrate users &&
+            python manage.py makemigrations &&
             python manage.py migrate &&
             python manage.py collectstatic --noinput &&
             cp -r /app/collected_static/. /backend_static/static/ &&
