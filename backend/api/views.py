@@ -1,6 +1,8 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.http import FileResponse
+from io import BytesIO
 
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -22,7 +24,7 @@ from recipes.models import (
 )
 from users.models import Subscription, User
 
-from .filter import IngredientFilter, RecipeFilter
+from .filter import RecipeFilter
 from .pagination import CustomPagination
 from .permissions import AuthorPermission
 from .serializers import (
@@ -33,8 +35,10 @@ from .serializers import (
     ShopListSerializer,
     SubscribeListSerializer,
     TagSerializer,
-    UserSerializer
+    UserSerializer,
+    AvatarSerializer
 )
+from recipes.make_pdf import make_pdf_file
 
 
 class UserViewSet(UserViewSet):
@@ -84,12 +88,35 @@ class UserViewSet(UserViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
+    @action(
+        methods=['put'],
+        detail=False,
+        permission_classes=[IsAuthenticated],
+        url_path='me/avatar',
+        url_name='me-avatar',
+    )
+    def avatar(self, request):
+        serializer = self._change_avatar(request.user, request.data)
+        return Response(serializer.data)
+
+    @avatar.mapping.delete
+    def delete_avatar(self, request):
+        data = {'avatar': None}  
+        self._change_avatar(request.user, data)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def _change_avatar(self, user, data):
+        serializer = AvatarSerializer(user, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return serializer
+
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, )
-    filter_backends = (IngredientFilter, )
+    filter_backends = (DjangoFilterBackend,)
     search_fields = ('^name', )
     pagination_class = None
 
@@ -132,12 +159,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):
-        ingredients = IngredientToRecipe.objects.filter(
-            recipe__shopping_list__user=request.user
-        ).order_by('ingredient__name').values(
-            'ingredient__name', 'ingredient__measurement_unit'
-        ).annotate(amount=Sum('amount'))
-        return self.send_message(ingredients)
+        ingredients = ShopList.get_shopping_ingredients(request.user)
+        pdf_file = make_pdf_file(ingredients, [], request)
+        return FileResponse(BytesIO(pdf_file), as_attachment=True, filename='shopping_list.pdf')
 
     @action(
         detail=True,

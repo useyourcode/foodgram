@@ -12,7 +12,7 @@ class Tag(models.Model):
         'Цвет', max_length=7, default="#ffffff", unique=True, format='hex',
         validators=[
             RegexValidator(
-                regex="^#([a-f0-9]{6}|[a-f0-9]{3})$",
+                regex=r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
                 message='Некорректный формат',
             )
         ],
@@ -176,3 +176,17 @@ class ShopList(ShoppingCart):
     def __str__(self):
         return (f' рецепт {ShopList.recipe}'
                 f'в корзине пользователя {ShopList.user}')
+
+    @classmethod
+    def get_shopping_ingredients(cls, user):
+        return (
+            IngredientToRecipe.objects.filter(
+                recipe__in=cls.objects.filter(user=user).values('recipe')
+            )
+            .values(name=models.F('ingredient__name'))
+            .annotate(
+                unit=models.F('ingredient__measurement_unit'),
+                amount=models.Sum('amount'),
+            )
+            .order_by('ingredient__name')
+        )

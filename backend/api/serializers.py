@@ -23,7 +23,7 @@ class UserSerializer(djoser.serializers.UserSerializer):
     class Meta:
         model = User
         fields = ('username', 'email', 'id', 'first_name',
-                  'last_name', 'is_subscribed')
+                  'last_name', 'is_subscribed', 'avatar')
         validators = [
             UniqueTogetherValidator(
                 queryset=User.objects.all(),
@@ -36,6 +36,15 @@ class UserSerializer(djoser.serializers.UserSerializer):
         if request.user.is_anonymous:
             return False
         return obj.subscriptions.filter(id=request.user.id).exists()
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+
+    avatar = Base64ImageField(allow_null=True)
+
+    class Meta:
+        model = User
+        fields = ('avatar',)
 
 
 class UserCreateSerializer(djoser.serializers.UserCreateSerializer):
@@ -212,14 +221,9 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return data
 
     def validate_tags(self, tags):
-        tags_set = set()
-        for tag in tags:
-            if tag in tags_set:
-                raise serializers.ValidationError('Теги должны быть уникальны')
-            if not Tag.objects.filter(id=tag.id).exists():
-                raise serializers.ValidationError('Тега не существует')
-            tags_set.add(tag)
-        if not tags_set:
+        if len(set(tags)) != len(tags):
+            raise serializers.ValidationError('Теги должны быть уникальны.')
+        if not tags:
             raise serializers.ValidationError('Отсутствуют теги')
         return tags
 
@@ -233,10 +237,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return cooking_time
 
     def validate_ingredients(self, data):
-        if not data:
-            raise serializers.ValidationError(
-                'Добавь ингридиенты!'
-            )
         ingredients = self.initial_data.get('ingredients')
         ingredients_list = []
         for ingredient in ingredients:
@@ -247,13 +247,12 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 )
             ingredients_list.append(ingredient_id)
             if int(ingredient.get('amount')) < 1:
-                raise serializers.ValidationError(
-                    'Не добавили ингредиенты')
-
+                raise serializers.ValidationError('Не добавили ингредиенты')
         return data
 
     @staticmethod
-    def create_ingredients(recipe, ingredients):
+    def add_tags_and_ingredients_to_recipe(recipe, tags, ingredients):
+        recipe.tags.set(tags)
         IngredientToRecipe.objects.bulk_create([
             IngredientToRecipe(
                 ingredient=ingredient_data['id'],
@@ -267,16 +266,14 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(author=request.user, **validated_data)
-        recipe.tags.set(tags)
-        self.create_ingredients(recipe, ingredients)
+        self.add_tags_and_ingredients_to_recipe(recipe, tags, ingredients)
         return recipe
 
     def update(self, recipe, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         IngredientToRecipe.objects.filter(recipe=recipe).delete()
-        self.create_ingredients(recipe, ingredients)
-        recipe.tags.set(tags)
+        self.add_tags_and_ingredients_to_recipe(recipe, tags, ingredients)
         return super().update(recipe, validated_data)
 
     def to_representation(self, instance):

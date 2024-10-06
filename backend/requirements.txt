@@ -40,3 +40,4 @@ gunicorn==20.1.0
 python-dotenv==0.21.0
 PyYAML==6.0
 django-filter
+fpdf2==2.7.8
