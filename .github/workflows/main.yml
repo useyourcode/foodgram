@@ -128,4 +128,4 @@ jobs:
             python manage.py collectstatic --noinput &&
             cp -r /app/collected_static/. /static/ &&
             python manage.py load_ingredients &&
-            python manage.py load_tags""
+            python manage.py load_tags"
