@@ -80,14 +80,14 @@ def make_pdf_file(ingredients, recipes, request):
     pdf.cell(0, 10, 'Ингредиенты:', ln=True)
     pdf.set_font('Montserrat', '', size=12)
     for ingredient in ingredients:
-            name = ingredient['name']
-            unit = ingredient['unit']
-            amount = ingredient['amount']
-            pdf.cell(
-                0, 6,
-                f"{name} ({unit}) - {amount}",
-                align='L', new_x='LEFT', new_y='NEXT'
-            )
+        name = ingredient['name']
+        unit = ingredient['unit']
+        amount = ingredient['amount']
+        pdf.cell(
+            0, 6,
+            f"{name} ({unit}) - {amount}",
+            align='L', new_x='LEFT', new_y='NEXT'
+        )
     pdf.ln(6)
 
     pdf_file = pdf.output(dest='S').encode('latin1')
