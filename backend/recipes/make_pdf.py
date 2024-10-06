@@ -1,5 +1,4 @@
 import os
-from django.shortcuts import render
 from fpdf import FPDF
 from foodgram.settings import BASE_DIR
 
@@ -65,20 +64,31 @@ def make_pdf_file(ingredients, recipes, request):
     pdf.add_page()
     pdf.set_font('Montserrat', 'I', size=14)
     pdf.set_text_color(0, 0, 0)
+
     if recipes:
         pdf.cell(0, 10, 'Рецепты:', ln=True)
         for recipe in recipes:
-            pdf.cell(0, 6, recipe, align='L', border='B', new_x='LEFT', new_y='NEXT')
+            pdf.cell(
+                0,
+                6,
+                recipe,
+                align='L', border='B', new_x='LEFT', new_y='NEXT'
+            )
         pdf.ln(6)
+
     pdf.set_font('Montserrat', 'B', size=12)
     pdf.cell(0, 10, 'Ингредиенты:', ln=True)
-
     pdf.set_font('Montserrat', '', size=12)
     for ingredient in ingredients:
-        pdf.cell(
-            0, 6, f"{ingredient['name']} ({ingredient['unit']}) - {ingredient['amount']}",
-            align='L', new_x='LEFT', new_y='NEXT'
-        )
+            name = ingredient['name']
+            unit = ingredient['unit']
+            amount = ingredient['amount']
+            pdf.cell(
+                0, 6,
+                f"{name} ({unit}) - {amount}",
+                align='L', new_x='LEFT', new_y='NEXT'
+            )
     pdf.ln(6)
+
     pdf_file = pdf.output(dest='S').encode('latin1')
     return pdf_file
