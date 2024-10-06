@@ -126,5 +126,6 @@ jobs:
             python manage.py makemigrations &&
             python manage.py migrate &&
             python manage.py collectstatic --noinput &&
-            cp -r /app/collected_static/. /backend_static/static/ &&
-            python manage.py load_ingredients"
+            cp -r /app/collected_static/. /static/ &&
+            python manage.py load_ingredients &&
+            python manage.py load_tags""
