@@ -2,6 +2,7 @@ version: '3'
 
 volumes:
   static:
+  backend_static:
   media:
   pg_data_production:
 services:
@@ -18,7 +19,7 @@ services:
     image: onedocforall/foodgram_backend
     env_file: .env
     volumes:
-      - static:/backend_static
+      - backend_static:/app/static/
       - media:/media
     depends_on:
       - db
@@ -37,6 +38,7 @@ services:
     image: onedocforall/foodgram_nginx
     env_file: .env
     volumes:
+      - backend_static:/static/backend/
       - static:/static
       - media:/media
       - ./docs/:/usr/share/nginx/html/api/docs/

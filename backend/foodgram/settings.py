@@ -124,7 +124,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/backend/'
 
-STATIC_ROOT = BASE_DIR / 'collected_static'
+STATIC_ROOT = '/app/static/'
 
 MEDIA_URL = '/media/'
 
