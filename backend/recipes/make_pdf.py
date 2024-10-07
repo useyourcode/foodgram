@@ -2,13 +2,10 @@ import os
 from fpdf import FPDF
 from foodgram.settings import BASE_DIR
 
-FONTS_DIR = BASE_DIR / 'data/fonts'
-LOGO = BASE_DIR / 'data/logo.png'
+FONTS_DIR = BASE_DIR / 'backend/recipes/data/fonts'
 
 
 class PDF(FPDF):
-
-    _logo = None
 
     def __init__(self, title="Список покупок", *args, **kwargs):
         self.title = title
@@ -17,9 +14,10 @@ class PDF(FPDF):
 
     def _set_font(self) -> None:
         fonts = [
-            ('Montserrat', '', 'Montserrat-Regular.ttf'),
-            ('Montserrat', 'B', 'Montserrat-Bold.ttf'),
-            ('Montserrat', 'I', 'Montserrat-Italic.ttf'),
+            ('Comic', '', 'COMIC.TTF'),
+            ('Comic', 'B', 'COMICBD.TTF'),
+            ('Comic', 'I', 'COMICI.TTF'),
+            ('Comic', 'Z', 'COMICZ.TTF')
         ]
         for font in fonts:
             font_path = os.path.join(FONTS_DIR, font[2])
@@ -27,13 +25,13 @@ class PDF(FPDF):
                 self.add_font(font[0], style=font[1], fname=font_path)
             else:
                 raise FileNotFoundError(f"Font file not found: {font_path}")
-        self.set_font('Montserrat')
+        self.set_font('Comic')
         self.set_text_shaping(True)
 
     def header(self) -> None:
         if not self._logo:
             self._logo = LOGO
-        self.set_font('Montserrat', 'B', size=22)
+        self.set_font('Comic', 'B', size=22)
         self.set_text_color(255, 255, 255)
         self.set_fill_color(127, 84, 178)
         self.rect(0, 0, 500, 25, style='F')
@@ -62,7 +60,7 @@ class PDF(FPDF):
 def make_pdf_file(ingredients, recipes, request):
     pdf = PDF()
     pdf.add_page()
-    pdf.set_font('Montserrat', 'I', size=14)
+    pdf.set_font('Comic', 'I', size=14)
     pdf.set_text_color(0, 0, 0)
 
     if recipes:
@@ -76,9 +74,9 @@ def make_pdf_file(ingredients, recipes, request):
             )
         pdf.ln(6)
 
-    pdf.set_font('Montserrat', 'B', size=12)
+    pdf.set_font('Comic', 'B', size=12)
     pdf.cell(0, 10, 'Ингредиенты:', ln=True)
-    pdf.set_font('Montserrat', '', size=12)
+    pdf.set_font('Comic', '', size=12)
     for ingredient in ingredients:
         name = ingredient['name']
         unit = ingredient['unit']
