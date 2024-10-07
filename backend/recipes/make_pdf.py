@@ -1,14 +1,16 @@
 import os
-from fpdf import FPDF
+
+from fpdf import FPDF, HTMLMixin
 from foodgram.settings import BASE_DIR
 
 FONTS_DIR = BASE_DIR / 'backend/recipes/data/fonts'
+LOGO = BASE_DIR / 'backend/recipes/data/logo.png'
 
 
-class PDF(FPDF):
-
+class PDF(FPDF, HTMLMixin):
     def __init__(self, title="Список покупок", *args, **kwargs):
         self.title = title
+        self._logo = LOGO if LOGO.exists() else None
         super().__init__(*args, **kwargs)
         self._set_font()
 
@@ -26,17 +28,16 @@ class PDF(FPDF):
             else:
                 raise FileNotFoundError(f"Font file not found: {font_path}")
         self.set_font('Comic')
-        self.set_text_shaping(True)
 
     def header(self) -> None:
-        if not self._logo:
-            self._logo = LOGO
+        if self._logo:
+            self.image(str(self._logo), 10, 7, 33)
+
         self.set_font('Comic', 'B', size=22)
         self.set_text_color(255, 255, 255)
         self.set_fill_color(127, 84, 178)
         self.rect(0, 0, 500, 25, style='F')
         self.cell(0, 7, self.title, align='C')
-        self.image(self._logo, 10, 7, 33)
         self.ln(20)
 
     def footer(self) -> None:
