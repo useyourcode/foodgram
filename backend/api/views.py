@@ -1,4 +1,3 @@
-from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.http import FileResponse
@@ -17,7 +16,6 @@ from rest_framework.response import Response
 from recipes.models import (
     Favorite,
     Ingredient,
-    IngredientToRecipe,
     Recipe,
     ShopList,
     Tag
@@ -49,7 +47,7 @@ class UserViewSet(UserViewSet):
     @action(
         methods=('get',),
         detail=False,
-        permission_classes=(IsAuthenticated,)
+        permission_classes=(IsAuthenticatedOrReadOnly,)
     )
     def get_self_page(self, request):
         serializer = self.get_serializer(request.user)
@@ -58,7 +56,7 @@ class UserViewSet(UserViewSet):
     @action(
         detail=True,
         methods=['POST', 'DELETE'],
-        permission_classes=(IsAuthenticated,)
+        permission_classes=(IsAuthenticatedOrReadOnly,)
     )
     def subscribe(self, request, id):
         user = request.user
@@ -101,7 +99,7 @@ class UserViewSet(UserViewSet):
 
     @avatar.mapping.delete
     def delete_avatar(self, request):
-        data = {'avatar': None}  
+        data = {'avatar': None}
         self._change_avatar(request.user, data)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -117,8 +115,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, )
     filter_backends = (DjangoFilterBackend,)
-    search_fields = ('^name', )
     pagination_class = None
+    search_fields = ('name', )
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -161,7 +159,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         ingredients = ShopList.get_shopping_ingredients(request.user)
         pdf_file = make_pdf_file(ingredients, [], request)
-        return FileResponse(BytesIO(pdf_file), as_attachment=True, filename='shopping_list.pdf')
+        return FileResponse(
+            BytesIO(pdf_file),
+            as_attachment=True,
+            filename='shopping_list.pdf'
+        )
 
     @action(
         detail=True,
