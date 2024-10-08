@@ -223,7 +223,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         recipe_id = self.instance.id if self.instance else None
         if Recipe.objects.filter(
-        text=data["text"]
+            text=data["text"]
         ).exclude(id=recipe_id).exists():
             raise serializers.ValidationError(
                 'Этот рецепт уже есть.'
