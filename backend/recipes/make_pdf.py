@@ -4,13 +4,11 @@ from fpdf import FPDF, HTMLMixin
 from foodgram.settings import BASE_DIR
 
 FONTS_DIR = BASE_DIR / 'recipes/data/fonts'
-LOGO = BASE_DIR / 'recipes/data/logo.png'
 
 
 class PDF(FPDF, HTMLMixin):
     def __init__(self, title="Список покупок", *args, **kwargs):
         self.title = title
-        self._logo = LOGO if LOGO.exists() else None
         super().__init__(*args, **kwargs)
         self._set_font()
 
@@ -18,8 +16,7 @@ class PDF(FPDF, HTMLMixin):
         fonts = [
             ('Comic', '', 'COMIC.TTF'),
             ('Comic', 'B', 'COMICBD.TTF'),
-            ('Comic', 'I', 'COMICI.TTF'),
-            ('Comic', 'Z', 'COMICZ.TTF')
+            ('Comic', 'I', 'COMICI.TTF')
         ]
         for font in fonts:
             font_path = os.path.join(FONTS_DIR, font[2])
@@ -30,12 +27,9 @@ class PDF(FPDF, HTMLMixin):
         self.set_font('Comic')
 
     def header(self) -> None:
-        if self._logo:
-            self.image(str(self._logo), 10, 7, 33)
-
         self.set_font('Comic', 'B', size=22)
         self.set_text_color(255, 255, 255)
-        self.set_fill_color(127, 84, 178)
+        self.set_fill_color(0, 0, 0)
         self.rect(0, 0, 500, 25, style='F')
         self.cell(0, 7, self.title, align='C')
         self.ln(20)
@@ -89,5 +83,5 @@ def make_pdf_file(ingredients, recipes, request):
         )
     pdf.ln(6)
 
-    pdf_file = pdf.output(dest='S').encode('latin1')
+    pdf_file = pdf.output(dest='S')
     return pdf_file
