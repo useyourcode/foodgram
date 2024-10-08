@@ -46,6 +46,7 @@ class AvatarSerializer(serializers.ModelSerializer):
         model = User
         fields = ('avatar',)
 
+
 class UserCreateSerializer(djoser.serializers.UserCreateSerializer):
 
     class Meta:
@@ -214,6 +215,12 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'name', 'image', 'text', 'cooking_time')
 
     def validate(self, data):
+        if Recipe.objects.filter(text=data['text']).exists():
+            raise serializers.ValidationError(
+                'Этот рецепт уже есть.')
+        return data
+
+    def validate(self, data):
         request = self.context.get('request', None)
         recipe_id = self.instance.id if self.instance else None
         if Recipe.objects.filter(text=data['text']).exclude(id=recipe_id).exists():
@@ -249,7 +256,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 )
             ingredients_list.append(ingredient_id)
             if int(ingredient.get('amount')) < 1:
-                raise serializers.ValidationError('Количество ингредиента должно быть больше 0.')
+                raise serializers.ValidationError('Не добавили ингредиенты')
         return data
 
     @staticmethod
