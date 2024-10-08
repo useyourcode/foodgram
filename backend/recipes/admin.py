@@ -15,7 +15,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'cooking_time',
                     'in_favorite',)
     list_filter = ('name', 'author', 'tags')
-    search_fields = ('name', 'author', 'tags')
+    search_fields = ('name', 'author__username', 'author__email', 'tags__name')
     inlines = (IngredientInline,)
     empty_value_display = '-'
 
@@ -39,14 +39,14 @@ class TagAdmin(admin.ModelAdmin):
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe')
     list_filter = ('user', 'recipe')
-    search_fields = ('user', 'recipe')
+    search_fields = ('user__username', 'user__email', 'recipe__name')
     empty_value_display = '-'
 
 
 class ShoplistAdmin(admin.ModelAdmin):
     list_display = ('recipe', 'user')
     list_filter = ('recipe', 'user')
-    search_fields = ('user', )
+    search_fields = ('user__username', 'user__email', 'recipe__name')
     empty_value_display = '-'
 
 

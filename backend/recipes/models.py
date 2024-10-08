@@ -33,8 +33,8 @@ class Ingredient(models.Model):
 
     class Meta:
         ordering = ('-id',)
-        verbose_name = 'Ингридиент'
-        verbose_name_plural = 'Ингридиенты'
+        verbose_name = 'ингредиент'
+        verbose_name_plural = 'Ингредиенты'
         constraints = [
             models.UniqueConstraint(
                 fields=['name', 'measurement_unit'],
@@ -72,7 +72,7 @@ class Recipe(models.Model):
 
     ingredients = models.ManyToManyField(
         Ingredient, through='IngredientToRecipe',
-        verbose_name='Ингридиенты',
+        verbose_name='Ингредиенты',
         related_name='recipes'
     )
     pub_date = models.DateTimeField(
@@ -113,7 +113,7 @@ class TagToRecipe(models.Model):
 
 class IngredientToRecipe(models.Model):
     ingredient = models.ForeignKey(
-        Ingredient, on_delete=models.CASCADE, verbose_name='ингридиент',
+        Ingredient, on_delete=models.CASCADE, verbose_name='ингредиент',
     )
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, verbose_name='рецепт',
@@ -127,8 +127,8 @@ class IngredientToRecipe(models.Model):
     )
 
     class Meta:
-        verbose_name = 'ингридиент'
-        verbose_name_plural = 'ингридиенты'
+        verbose_name = 'ингредиент'
+        verbose_name_plural = 'ингредиенты'
 
     def __str__(self):
         return f'{self.ingredient} + {self.recipe}'

@@ -46,7 +46,6 @@ class AvatarSerializer(serializers.ModelSerializer):
         model = User
         fields = ('avatar',)
 
-
 class UserCreateSerializer(djoser.serializers.UserCreateSerializer):
 
     class Meta:
@@ -215,9 +214,12 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'name', 'image', 'text', 'cooking_time')
 
     def validate(self, data):
-        if Recipe.objects.filter(text=data['text']).exists():
+        request = self.context.get('request', None)
+        recipe_id = self.instance.id if self.instance else None
+        if Recipe.objects.filter(text=data['text']).exclude(id=recipe_id).exists():
             raise serializers.ValidationError(
-                'Этот рецепт уже есть.')
+                'Этот рецепт уже есть.'
+            )
         return data
 
     def validate_tags(self, tags):
@@ -247,7 +249,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 )
             ingredients_list.append(ingredient_id)
             if int(ingredient.get('amount')) < 1:
-                raise serializers.ValidationError('Не добавили ингредиенты')
+                raise serializers.ValidationError('Количество ингредиента должно быть больше 0.')
         return data
 
     @staticmethod
@@ -270,10 +272,13 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, recipe, validated_data):
-        ingredients = validated_data.pop('ingredients')
-        tags = validated_data.pop('tags')
-        IngredientToRecipe.objects.filter(recipe=recipe).delete()
-        self.add_tags_and_ingredients_to_recipe(recipe, tags, ingredients)
+        tags = validated_data.pop('tags', None)
+        ingredients = validated_data.pop('ingredients', None)
+        if tags is not None:
+            recipe.tags.set(tags)
+        if ingredients is not None:
+            IngredientToRecipe.objects.filter(recipe=recipe).delete()
+            self.add_tags_and_ingredients_to_recipe(recipe, tags, ingredients)
         return super().update(recipe, validated_data)
 
     def to_representation(self, instance):
