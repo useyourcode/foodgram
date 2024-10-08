@@ -3,8 +3,8 @@ import os
 from fpdf import FPDF, HTMLMixin
 from foodgram.settings import BASE_DIR
 
-FONTS_DIR = BASE_DIR / 'backend/recipes/data/fonts'
-LOGO = BASE_DIR / 'backend/recipes/data/logo.png'
+FONTS_DIR = BASE_DIR / 'recipes/data/fonts'
+LOGO = BASE_DIR / 'recipes/data/logo.png'
 
 
 class PDF(FPDF, HTMLMixin):
