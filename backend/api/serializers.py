@@ -215,12 +215,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'name', 'image', 'text', 'cooking_time')
 
     def validate(self, data):
-        if Recipe.objects.filter(text=data['text']).exists():
-            raise serializers.ValidationError(
-                'Этот рецепт уже есть.')
-        return data
-
-    def validate(self, data):
         recipe_id = self.instance.id if self.instance else None
         if Recipe.objects.filter(
             text=data["text"]
