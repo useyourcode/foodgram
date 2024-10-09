@@ -16,6 +16,9 @@ from recipes.models import (
 )
 from users.models import User
 
+MIN_COOKING_TIME = 1
+MAX_COOKING_TIME = 2880
+
 
 class UserSerializer(djoser.serializers.UserSerializer):
     is_subscribed = SerializerMethodField(read_only=True)
@@ -127,11 +130,6 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'color', 'slug')
         model = Tag
 
-    def validate(self, data):
-        for key, value in data.items():
-            data[key] = value.strip('#').lower()
-        return data
-
 
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -179,10 +177,6 @@ class RecipeReadSerializer(serializers.ModelSerializer):
                   'is_favorited', 'is_in_shopping_cart',
                   'name', 'image', 'text', 'cooking_time'
                   )
-
-    def get_ingredients(self, obj):
-        ingredients = IngredientToRecipe.objects.filter(recipe=obj)
-        return IngredientRecipeSerializer(ingredients, many=True).data
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
@@ -232,17 +226,18 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return tags
 
     def validate_cooking_time(self, cooking_time):
-        if cooking_time < 1:
+        if cooking_time < MIN_COOKING_TIME:
             raise serializers.ValidationError(
                 'Минимум 1 минута')
-        if cooking_time > 2880:
+        if cooking_time > MAX_COOKING_TIME:
             raise serializers.ValidationError(
                 'Время готовки должно быть не больше 2 суток')
         return cooking_time
 
     def validate_ingredients(self, data):
-        ingredients = self.initial_data.get('ingredients')
+        ingredients = data.get('ingredients')
         ingredients_list = []
+
         for ingredient in ingredients:
             ingredient_id = ingredient['id']
             if ingredient_id in ingredients_list:
@@ -250,6 +245,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                     'Добавили одинаковые ингредиенты.'
                 )
             ingredients_list.append(ingredient_id)
+
             if int(ingredient.get('amount')) < 1:
                 raise serializers.ValidationError('Не добавили ингредиенты')
         return data

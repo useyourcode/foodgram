@@ -106,6 +106,7 @@ class TagToRecipe(models.Model):
     class Meta:
         verbose_name = 'тег'
         verbose_name_plural = 'Теги'
+        unique_together = ('tag', 'recipe')
 
     def __str__(self):
         return f'{self.tag} + {self.recipe}'
@@ -117,7 +118,7 @@ class IngredientToRecipe(models.Model):
     )
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, verbose_name='рецепт',
-        related_name='ingredienttorecipe'
+        related_name='ingredient_to_recipe'
     )
 
     amount = models.PositiveIntegerField(
@@ -129,6 +130,7 @@ class IngredientToRecipe(models.Model):
     class Meta:
         verbose_name = 'ингредиент'
         verbose_name_plural = 'ингредиенты'
+        unique_together = ('ingredient', 'recipe')
 
     def __str__(self):
         return f'{self.ingredient} + {self.recipe}'
@@ -160,6 +162,7 @@ class Favorite(ShoppingCart):
         default_related_name = 'favorites'
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
+        unique_together = ('user', 'recipe')
 
         def __str__(self):
             return (f' рецепт {Favorite.recipe}'
@@ -172,6 +175,7 @@ class ShopList(ShoppingCart):
         default_related_name = 'shopping_list'
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзина'
+        unique_together = ('user', 'recipe')
 
     def __str__(self):
         return (f' рецепт {ShopList.recipe}'
@@ -186,7 +190,7 @@ class ShopList(ShoppingCart):
             .values(name=models.F('ingredient__name'))
             .annotate(
                 unit=models.F('ingredient__measurement_unit'),
-                amount=models.Sum('amount'),
+                total_amount=models.Sum('amount'),
             )
             .order_by('ingredient__name')
         )
