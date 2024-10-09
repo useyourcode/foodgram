@@ -17,7 +17,6 @@ class Migration(migrations.Migration):
             name='LinkMapped',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('url_hash', models.CharField(default=recipes.models.generate_hash, max_length=10, unique=True)),
                 ('original_url', models.CharField(max_length=255)),
             ],
         ),
