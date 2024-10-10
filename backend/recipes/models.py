@@ -106,7 +106,12 @@ class TagToRecipe(models.Model):
     class Meta:
         verbose_name = 'тег'
         verbose_name_plural = 'Теги'
-        unique_together = ('tag', 'recipe')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['tag', 'recipe'],
+                name='unique_tag_recipe'
+            )
+        ]
 
     def __str__(self):
         return f'{self.tag} + {self.recipe}'
@@ -130,7 +135,12 @@ class IngredientToRecipe(models.Model):
     class Meta:
         verbose_name = 'ингредиент'
         verbose_name_plural = 'ингредиенты'
-        unique_together = ('ingredient', 'recipe')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'recipe'],
+                name='unique_ingredient_recipe'
+            )
+        ]
 
     def __str__(self):
         return f'{self.ingredient} + {self.recipe}'
@@ -162,11 +172,16 @@ class Favorite(ShoppingCart):
         default_related_name = 'favorites'
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
-        unique_together = ('user', 'recipe')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorite_user_recipe'
+            )
+        ]
 
-        def __str__(self):
-            return (f' рецепт {Favorite.recipe}'
-                    f'в избранном пользователя {Favorite.user}')
+    def __str__(self):
+        return (f' рецепт {Favorite.recipe}'
+                f'в избранном пользователя {Favorite.user}')
 
 
 class ShopList(ShoppingCart):
@@ -175,7 +190,12 @@ class ShopList(ShoppingCart):
         default_related_name = 'shopping_list'
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзина'
-        unique_together = ('user', 'recipe')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_shoplist_user_recipe'
+            )
+        ]
 
     def __str__(self):
         return (f' рецепт {ShopList.recipe}'

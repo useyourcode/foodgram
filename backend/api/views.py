@@ -1,9 +1,8 @@
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from django.http import FileResponse
 from io import BytesIO
 
-from django_filters.rest_framework import DjangoFilterBackend
+from django.http import FileResponse, HttpResponse
+from django.shortcuts import get_object_or_404
+
 from djoser.views import UserViewSet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -12,7 +11,9 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly
 )
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 
+from recipes.make_pdf import make_pdf_file
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -21,12 +22,12 @@ from recipes.models import (
     Tag
 )
 from users.models import Subscription, User
-
 from .filter import RecipeFilter
 from .mixin import AddRemoveMixin
 from .pagination import CustomPagination
 from .permissions import AuthorPermission
 from .serializers import (
+    AvatarSerializer,
     CreateRecipeSerializer,
     FavoriteSerializer,
     IngredientSerializer,
@@ -34,10 +35,8 @@ from .serializers import (
     ShopListSerializer,
     SubscribeListSerializer,
     TagSerializer,
-    UserSerializer,
-    AvatarSerializer
+    UserSerializer
 )
-from recipes.make_pdf import make_pdf_file
 
 
 class UserViewSet(UserViewSet):
@@ -145,7 +144,7 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
             "{name} ({unit}) - {amount}".format(
                 name=ing['ingredient__name'],
                 unit=ing['ingredient__measurement_unit'],
-                amount=ing['amount']
+                amount=ing['total_amount']
             ) for ing in ingredients
         ]
         shopping_list = "Купить в магазине:\n" + "\n".join(items)
