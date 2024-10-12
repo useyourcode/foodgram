@@ -1,6 +1,7 @@
 import os
 
 from fpdf import FPDF, HTMLMixin
+
 from foodgram.settings import BASE_DIR
 
 FONTS_DIR = BASE_DIR / 'recipes/data/fonts'
