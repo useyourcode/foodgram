@@ -126,7 +126,10 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
             qs_startswith = queryset.none()
 
         if contains_name:
-            qs_contains = queryset.filter(name__icontains=contains_name).exclude(name__istartswith=startswith_name)
+            qs_contains = (
+                queryset.filter(name__icontains=contains_name)
+                .exclude(name__istartswith=startswith_name)
+            )
         else:
             qs_contains = queryset.none()
         return qs_startswith.union(qs_contains).order_by('name')
