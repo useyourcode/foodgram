@@ -21,7 +21,7 @@ from recipes.models import (
     Tag
 )
 from users.models import Subscription, User
-from .filter import RecipeFilter
+from .filter import RecipeFilter, IngredientFilter
 from .mixin import AddRemoveMixin
 from .pagination import CustomPagination
 from .permissions import AuthorPermission
@@ -113,8 +113,23 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, )
     filter_backends = (DjangoFilterBackend,)
+    filterset_class = IngredientFilter
     pagination_class = None
-    search_fields = ('name', )
+
+    def filter_queryset(self, queryset):
+        startswith_name = self.request.query_params.get('name__startswith')
+        contains_name = self.request.query_params.get('name__contains')
+
+        if startswith_name:
+            qs_startswith = queryset.filter(name__istartswith=startswith_name)
+        else:
+            qs_startswith = queryset.none()
+
+        if contains_name:
+            qs_contains = queryset.filter(name__icontains=contains_name).exclude(name__istartswith=startswith_name)
+        else:
+            qs_contains = queryset.none()
+        return qs_startswith.union(qs_contains).order_by('name')
 
 
 class TagViewSet(viewsets.ModelViewSet):
