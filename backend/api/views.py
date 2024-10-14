@@ -112,9 +112,20 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, )
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = [DjangoFilterBackend]
     filterset_class = IngredientFilter
-    pagination_class = None
+
+    def filter_queryset(self, queryset):
+        startswith_name = self.request.query_params.get('name__startswith')
+        contains_name = self.request.query_params.get('name__contains')
+
+        if startswith_name:
+            queryset = queryset.filter(name__istartswith=startswith_name)
+
+        if contains_name:
+            queryset = queryset.filter(name__icontains=contains_name)
+
+        return queryset.distinct().order_by('name')
 
 
 class TagViewSet(viewsets.ModelViewSet):
