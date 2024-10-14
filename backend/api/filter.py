@@ -5,19 +5,11 @@ from recipes.models import Ingredient, Recipe, Tag
 
 class IngredientFilter(filters.FilterSet):
 
-    name__startswith = filters.CharFilter(
-        field_name='name',
-        lookup_expr='istartswith'
-    )
-
-    name__contains = filters.CharFilter(
-        field_name='name',
-        lookup_expr='icontains'
-    )
+    name = filters.CharFilter(lookup_expr='istartswith')
 
     class Meta:
         model = Ingredient
-        fields = ['name__startswith', 'name__contains']
+        fields = ('name', )
 
 
 class RecipeFilter(filters.FilterSet):
