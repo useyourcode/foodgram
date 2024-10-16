@@ -5,6 +5,7 @@ from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
 from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.reverse import reverse
 
 from recipes.models import (
     Favorite,
@@ -333,14 +334,20 @@ class ShopListSerializer(serializers.ModelSerializer):
 
 class LinkLiteSerializer(serializers.ModelSerializer):
 
-    short_link = serializers.SerializerMethodField()
-
     class Meta:
         model = URL
-        fields = ('original_url', 'short_link')
+        fields = ('original_url',)
+        write_only_fields = ('original_url',)
 
     def get_short_link(self, obj):
-        return self.context['request'].build_absolute_uri(reverse('shortener:load_url', args=[obj.url_hash]))
+        request = self.context.get('request')
+        return request.build_absolute_uri(
+            reverse('shortener:load_url', args=[obj.url_hash])
+        )
 
     def create(self, validated_data):
-        return URL.objects.get_or_create(**validated_data)[0]
+        instance, _ = URL.objects.get_or_create(**validated_data)
+        return instance
+
+    def to_representation(self, instance):
+        return {'short-link': self.get_short_link(instance)}

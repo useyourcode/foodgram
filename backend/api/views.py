@@ -11,6 +11,7 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+from django.urls import reverse
 
 from recipes.make_pdf import make_pdf_file
 from recipes.models import (
@@ -205,11 +206,13 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
         url_name='get-link',
     )
     def get_link(self, request, pk=None):
-        recipe = self.get_object()
+        self.get_object()
+
         original_url = request.META.get('HTTP_REFERER')
         if original_url is None:
             url = reverse('api:recipe-detail', kwargs={'pk': pk})
             original_url = request.build_absolute_uri(url)
+
         serializer = self.get_serializer(
             data={'original_url': original_url},
             context={'request': request},
