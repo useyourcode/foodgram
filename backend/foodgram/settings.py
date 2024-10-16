@@ -33,7 +33,7 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
-    'recipes.apps.LinkliteConfig',
+    'linklite.apps.LinkliteConfig',
     'colorfield',
 ]
 

@@ -36,7 +36,7 @@ from .serializers import (
     SubscribeListSerializer,
     TagSerializer,
     UserSerializer,
-    LinkLiteSerializer
+    LinkLiteSerializer,
 )
 
 
