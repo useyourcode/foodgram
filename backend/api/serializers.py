@@ -15,6 +15,7 @@ from recipes.models import (
     Tag
 )
 from users.models import User
+from linklite.models import URL
 
 MIN_COOKING_TIME = 1
 MAX_COOKING_TIME = 2880
@@ -328,3 +329,18 @@ class ShopListSerializer(serializers.ModelSerializer):
             instance.recipe,
             context={'request': self.context.get('request')}
         ).data
+
+
+class LinkLiteSerializer(serializers.ModelSerializer):
+
+    short_link = serializers.SerializerMethodField()
+
+    class Meta:
+        model = URL
+        fields = ('original_url', 'short_link')
+
+    def get_short_link(self, obj):
+        return self.context['request'].build_absolute_uri(reverse('shortener:load_url', args=[obj.url_hash]))
+
+    def create(self, validated_data):
+        return URL.objects.get_or_create(**validated_data)[0]

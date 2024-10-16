@@ -34,7 +34,8 @@ from .serializers import (
     ShopListSerializer,
     SubscribeListSerializer,
     TagSerializer,
-    UserSerializer
+    UserSerializer,
+    LinkLiteSerializer
 )
 
 
@@ -133,8 +134,14 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.action in ['list', 'retrieve']:
             return RecipeReadSerializer
+        elif self.action == 'get_link':
+            return LinkLiteSerializer
+        elif self.action == 'favorite':
+            return FavoriteSerializer
+        elif self.action == 'shopping_cart':
+            return ShopListSerializer
         return CreateRecipeSerializer
 
     @staticmethod
@@ -190,3 +197,24 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
     def destroy_favorite(self, request, pk):
         self.model = Favorite
         return self.remove_from_list(request, pk)
+
+    @action(
+        methods=['get'],
+        detail=True,
+        url_path='get-link',
+        url_name='get-link',
+    )
+    def get_link(self, request, pk=None):
+        recipe = self.get_object()
+        original_url = request.META.get('HTTP_REFERER')
+        if original_url is None:
+            url = reverse('api:recipe-detail', kwargs={'pk': pk})
+            original_url = request.build_absolute_uri(url)
+        serializer = self.get_serializer(
+            data={'original_url': original_url},
+            context={'request': request},
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
