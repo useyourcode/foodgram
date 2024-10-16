@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.http import require_GET
-from models import URL
+
+from .models import URL
 
 
 @require_GET
