@@ -34,8 +34,8 @@ class URL(models.Model):
 
     def save(self, *args, **kwargs):
         while (
-            not self.pk and 
-            URL.objects.filter(url_hash=self.url_hash).exists()
+            not self.pk
+            and URL.objects.filter(url_hash=self.url_hash).exists()
         ):
             self.url_hash = generate_hash()
         super().save(*args, **kwargs)
