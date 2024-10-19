@@ -78,7 +78,6 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         model = Subscription
         fields = (
             'author',
-            'email',
             'id',
             'username',
             'first_name',
@@ -86,7 +85,7 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
             'recipes',
             'recipes_count',
         )
-        read_only_fields = ('email', 'username', 'author',
+        read_only_fields = ('username', 'author',
                             'first_name', 'last_name')
 
     def validate(self, data):
@@ -94,13 +93,13 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         author_id = request.parser_context.get('kwargs').get('id')
         author = get_object_or_404(User, id=author_id)
         user = request.user
-        if user.subscriptions.filter(author=author_id).exists():
-            raise ValidationError(
+        if Subscription.subscriptions.filter(author=author_id).exists():
+            raise serializers.ValidationError(
                 'Вы уже подписаны',
                 code=status.HTTP_400_BAD_REQUEST
             )
         if user == author:
-            raise ValidationError(
+            raise serializers.ValidationError(
                 'Ты не можешь подписаться на себя',
                 code=status.HTTP_400_BAD_REQUEST
             )
@@ -112,7 +111,7 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
     def get_recipes(self, obj):
         request = self.context.get('request')
         limit = int(request.GET.get('recipes_limit', 0))
-        recipes = obj.recipes.all()[:limit] if limit else obj.recipes.all()
+        recipes = obj.author.recipes.all()[:limit] if limit else obj.author.recipes.all()
         serializer = RecipeShortSerializer(recipes, many=True, read_only=True)
         return serializer.data
 

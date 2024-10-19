@@ -13,7 +13,7 @@ class AddRemoveMixin:
         context = {"request": request}
         instance = get_object_or_404(self.model, id=pk)
         data = {
-            'subscriber': request.user.id,
+            'user': request.user.id,
             self.model_field: instance.id
         }
         serializer = self.serializer_class(data=data, context=context)
@@ -25,7 +25,7 @@ class AddRemoveMixin:
         instance = get_object_or_404(self.model, id=pk)
         obj = get_object_or_404(
             self.related_model,
-            subscriber=request.user,
+            user=request.user,
             **{self.model_field: instance}
         )
         obj.delete()
