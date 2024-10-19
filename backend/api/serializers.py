@@ -118,9 +118,9 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         request = self.context.get('request')
         limit = int(request.GET.get('recipes_limit', 0))
         if limit:
-            recipes = obj.author.recipes.all()[:limit]
+            recipes = obj.recipes.all()[:limit]
         else:
-            recipes = obj.author.recipes.all()
+            recipes = obj.recipes.all()
         serializer = RecipeShortSerializer(recipes, many=True, read_only=True)
         return serializer.data
 
