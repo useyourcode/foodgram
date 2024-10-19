@@ -1,6 +1,7 @@
 import djoser.serializers
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework import serializers
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers, status
 from rest_framework.fields import SerializerMethodField
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.reverse import reverse
@@ -68,7 +69,7 @@ class UserCreateSerializer(djoser.serializers.UserCreateSerializer):
                 'last_name', 'avatar')
 
 
-class SubscribeListSerializer(serializers.ModelSerializer):
+class SubscribeListSerializer(djoser.serializers.UserSerializer):
     author_username = serializers.CharField(
         source='author.username',
         read_only=True
@@ -81,25 +82,33 @@ class SubscribeListSerializer(serializers.ModelSerializer):
         model = Subscription
         fields = (
             'author',
-            'subscriber',
+            'author_username',
+            'author_email',
+            'recipes',
+            'recipes_count',
         )
-        read_only_fields = ('subscriber',)
+        read_only_fields = ['author']
 
-    def validate_author(self, author):
-        user = self.context['request'].user
-        subscription_exists = Subscription.objects.filter(
+    def validate(self, data):
+        request = self.context['request']
+        author_id = request.parser_context.get('kwargs').get('id')
+        author = get_object_or_404(User, id=author_id)
+        user = request.user
+        is_subscribed = Subscription.objects.filter(
             subscriber=user,
             author=author
         ).exists()
-        if subscription_exists:
+        if is_subscribed:
             raise serializers.ValidationError(
-                'Вы уже подписаны на этого автора.'
+                'Вы уже подписаны',
+                code=status.HTTP_400_BAD_REQUEST
             )
+
         if user == author:
             raise serializers.ValidationError(
-                'Нельзя подписаться на самого себя.'
+                'Ты не можешь подписаться на себя'
             )
-        return author
+        return data
 
     def get_recipes_count(self, obj):
         return obj.author.recipes.count()
