@@ -106,8 +106,7 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
 
         if user == author:
             raise serializers.ValidationError(
-                'Ты не можешь подписаться на себя',
-                code=status.HTTP_400_BAD_REQUEST
+                'Ты не можешь подписаться на себя'
             )
         return data
 
