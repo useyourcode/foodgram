@@ -10,6 +10,7 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
 from recipes.make_pdf import make_pdf_file
@@ -59,14 +60,26 @@ class UserViewSet(UserViewSet, AddRemoveMixin):
         permission_classes=(IsAuthenticatedOrReadOnly,)
     )
     def subscribe(self, request, id):
-        self.serializer_class = SubscribeListSerializer
-        self.model = User
-        self.related_model = Subscription
-        self.model_field = 'author'
+        user = request.user
+        author = get_object_or_404(User, pk=id)
 
         if request.method == 'POST':
-            return self.add_to_list(request, id)
-        return self.remove_from_list(request, id)
+            serializer = SubscribeListSerializer(
+                data={'author': author},
+                context={'request': request}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save(subscriber=user, author=author)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        if request.method == 'DELETE':
+            subscription = get_object_or_404(
+                Subscription,
+                subscriber=user,
+                author=author
+            )
+            subscription.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, permission_classes=(IsAuthenticated,))
     def subscriptions(self, request):

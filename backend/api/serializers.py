@@ -88,24 +88,21 @@ class SubscribeListSerializer(serializers.ModelSerializer):
             'recipes_count',
         )
         read_only_fields = ['author']
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Subscription.objects.all(),
+                fields=('subscriber', 'author'),
+                message='Вы уже подписаны на этого пользователя',
+            )
+        ]
 
-    def validate(self, data):
-        request = self.context.get('request')
-        author_id = request.parser_context.get('kwargs').get('id')
-        author = get_object_or_404(User, id=author_id)
-        user = request.user
-        if Subscription.objects.filter(
-            subscriber=user,
-            author=author
-        ).exists():
-            raise serializers.ValidationError('Вы уже подписаны')
-
+    def validate(self, author):
+        user = self.context['request'].user
         if user == author:
             raise serializers.ValidationError(
                 'Нельзя подписаться на самого себя'
             )
-
-        return data
+        return author
 
     def get_recipes_count(self, obj):
         return obj.author.recipes.count()
@@ -113,7 +110,8 @@ class SubscribeListSerializer(serializers.ModelSerializer):
     def get_recipes(self, obj):
         request = self.context.get('request')
         limit = int(request.GET.get('recipes_limit', 0))
-        recipes = obj.recipes.all()[:limit] if limit else obj.recipes.all()
+        recipes = (obj.author.recipes.all()[:limit]
+                   if limit else obj.author.recipes.all())
         serializer = RecipeShortSerializer(recipes, many=True, read_only=True)
         return serializer.data
 
