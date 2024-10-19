@@ -62,6 +62,7 @@ class UserViewSet(UserViewSet, AddRemoveMixin):
         self.serializer_class = SubscribeListSerializer
         self.model = User
         self.related_model = Subscription
+        self.model_field = 'author'
 
         if request.method == 'POST':
             return self.add_to_list(request, id)
@@ -170,12 +171,14 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
         self.serializer_class = ShopListSerializer
         self.model = Recipe
         self.related_model = ShopList
+        self.model_field = 'recipe'
         return self.add_to_list(request, pk)
 
     @shopping_cart.mapping.delete
     def destroy_shopping_cart(self, request, pk):
         self.model = Recipe
         self.related_model = ShopList
+        self.model_field = 'recipe'
         return self.remove_from_list(request, pk)
 
     @action(
@@ -186,12 +189,14 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
         self.serializer_class = FavoriteSerializer
         self.model = Recipe
         self.related_model = Favorite
+        self.model_field = 'recipe'
         return self.add_to_list(request, pk)
 
     @favorite.mapping.delete
     def destroy_favorite(self, request, pk):
         self.model = Recipe
         self.related_model = Favorite
+        self.model_field = 'recipe'
         return self.remove_from_list(request, pk)
 
     @action(

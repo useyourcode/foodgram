@@ -7,13 +7,14 @@ class AddRemoveMixin:
     serializer_class = None
     model = None
     related_model = None
+    model_field = None
 
     def add_to_list(self, request, pk):
         context = {"request": request}
-        recipe = get_object_or_404(self.model, id=pk)
+        instance = get_object_or_404(self.model, id=pk)
         data = {
             'user': request.user.id,
-            'recipe': recipe.id
+            self.model_field: instance.id
         }
         serializer = self.serializer_class(data=data, context=context)
         serializer.is_valid(raise_exception=True)
@@ -21,11 +22,11 @@ class AddRemoveMixin:
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def remove_from_list(self, request, pk):
-        recipe = get_object_or_404(self.model, id=pk)
+        instance = get_object_or_404(self.model, id=pk)
         obj = get_object_or_404(
             self.related_model,
             user=request.user,
-            recipe=recipe
+            **{self.model_field: instance}
         )
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
