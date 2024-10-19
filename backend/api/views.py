@@ -196,7 +196,7 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
 
     @favorite.mapping.delete
     def destroy_favorite(self, request, pk):
-        self.related_model = Favorite 
+        self.related_model = Favorite
         return self.remove_from_list(request, pk)
 
     @action(
