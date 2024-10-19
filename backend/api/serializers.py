@@ -75,8 +75,8 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         read_only=True
     )
     author_email = serializers.CharField(source='author.email', read_only=True)
-    recipes_count = SerializerMethodField()
-    recipes = SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
 
     class Meta:
         model = Subscription
@@ -87,7 +87,7 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
             'recipes',
             'recipes_count',
         )
-        read_only_fields = ('author')
+        read_only_fields = ['author']
 
     def validate(self, data):
         request = self.context.get('request')
