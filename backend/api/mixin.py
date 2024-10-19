@@ -12,7 +12,7 @@ class AddRemoveMixin:
     def add_to_list(self, request, pk):
         context = {"request": request}
         instance = get_object_or_404(self.model, id=pk)
-        if self.model_field == 'author':  
+        if self.model_field == 'author':
             data = {
                 'subscriber': request.user.id,
                 self.model_field: instance.id
