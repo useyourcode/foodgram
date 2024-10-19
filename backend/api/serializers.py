@@ -13,9 +13,9 @@ from recipes.models import (
     IngredientToRecipe,
     Recipe,
     ShopList,
-    Tag
+    Tag,
 )
-from users.models import User
+from users.models import User, Subscription
 from linklite.models import URL
 
 MIN_COOKING_TIME = 1
@@ -75,8 +75,9 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
     recipes = SerializerMethodField()
 
     class Meta:
-        model = User
+        model = Subscription
         fields = (
+            'author',
             'email',
             'id',
             'username',
@@ -85,7 +86,7 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
             'recipes',
             'recipes_count',
         )
-        read_only_fields = ('email', 'username',
+        read_only_fields = ('email', 'username', 'author',
                             'first_name', 'last_name')
 
     def validate(self, data):
