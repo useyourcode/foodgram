@@ -94,11 +94,16 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         author_id = request.parser_context.get('kwargs').get('id')
         author = get_object_or_404(User, id=author_id)
         user = request.user
-        if Subscription.objects.filter(subscriber=user, author=author).exists():
+        is_subscribed = Subscription.objects.filter(
+            subscriber=user,
+            author=author
+        ).exists()
+        if is_subscribed:
             raise serializers.ValidationError(
                 'Вы уже подписаны',
                 code=status.HTTP_400_BAD_REQUEST
             )
+
         if user == author:
             raise serializers.ValidationError(
                 'Ты не можешь подписаться на себя',
