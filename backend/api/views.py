@@ -1,7 +1,6 @@
 from io import BytesIO
 
 from django.http import FileResponse, HttpResponse
-from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
