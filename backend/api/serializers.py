@@ -70,6 +70,8 @@ class UserCreateSerializer(djoser.serializers.UserCreateSerializer):
 
 
 class SubscribeListSerializer(djoser.serializers.UserSerializer):
+    author_username = serializers.CharField(source='author.username', read_only=True)
+    author_email = serializers.CharField(source='author.email', read_only=True)
     recipes_count = SerializerMethodField()
     recipes = SerializerMethodField()
 
@@ -77,15 +79,12 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         model = Subscription
         fields = (
             'author',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
+            'author_username',
+            'author_email',
             'recipes',
             'recipes_count',
         )
-        read_only_fields = ('username', 'author',
-                            'first_name', 'last_name')
+        read_only_fields = ('author')
 
     def validate(self, data):
         request = self.context.get('request')
@@ -105,7 +104,7 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         return data
 
     def get_recipes_count(self, obj):
-        return obj.recipes.count()
+        return obj.author.recipes.count()
 
     def get_recipes(self, obj):
         request = self.context.get('request')
