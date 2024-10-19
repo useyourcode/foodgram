@@ -13,12 +13,12 @@ class AddRemoveMixin:
         context = {"request": request}
         instance = get_object_or_404(self.model, id=pk)
         data = {
-            'user': request.user.id,
+            'subscriber': request.user.id,
             self.model_field: instance.id
         }
         serializer = self.serializer_class(data=data, context=context)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(subscriber=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def remove_from_list(self, request, pk):
