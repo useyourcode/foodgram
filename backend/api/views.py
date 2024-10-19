@@ -168,11 +168,13 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
         permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, pk):
         self.serializer_class = ShopListSerializer
+        self.model = Recipe
         self.related_model = ShopList
         return self.add_to_list(request, pk)
 
     @shopping_cart.mapping.delete
     def destroy_shopping_cart(self, request, pk):
+        self.model = Recipe
         self.related_model = ShopList
         return self.remove_from_list(request, pk)
 
@@ -182,11 +184,13 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
         permission_classes=[IsAuthenticated])
     def favorite(self, request, pk):
         self.serializer_class = FavoriteSerializer
+        self.model = Recipe
         self.related_model = Favorite
         return self.add_to_list(request, pk)
 
     @favorite.mapping.delete
     def destroy_favorite(self, request, pk):
+        self.model = Recipe
         self.related_model = Favorite
         return self.remove_from_list(request, pk)
 
