@@ -18,7 +18,7 @@ class AddRemoveMixin:
         }
         serializer = self.serializer_class(data=data, context=context)
         serializer.is_valid(raise_exception=True)
-        serializer.save(subscriber=request.user)
+        serializer.save(subscriber=request.user, author=instance)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def remove_from_list(self, request, pk):
