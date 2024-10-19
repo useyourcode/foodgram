@@ -12,21 +12,39 @@ class AddRemoveMixin:
     def add_to_list(self, request, pk):
         context = {"request": request}
         instance = get_object_or_404(self.model, id=pk)
-        data = {
-            'subscriber': request.user.id,
-            self.model_field: instance.id
-        }
-        serializer = self.serializer_class(data=data, context=context)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(subscriber=request.user, author=instance)
+        if self.model_field == 'author':  
+            data = {
+                'subscriber': request.user.id,
+                self.model_field: instance.id
+            }
+            serializer = self.serializer_class(data=data, context=context)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(subscriber=request.user, author=instance)
+        else:
+            data = {
+                'user': request.user.id,
+                self.model_field: instance.id
+            }
+            serializer = self.serializer_class(data=data, context=context)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def remove_from_list(self, request, pk):
         instance = get_object_or_404(self.model, id=pk)
-        obj = get_object_or_404(
-            self.related_model,
-            user=request.user,
-            **{self.model_field: instance}
-        )
+        if hasattr(self.related_model, 'user'):
+            obj = get_object_or_404(
+                self.related_model,
+                user=request.user,
+                **{self.model_field: instance}
+            )
+        else:
+            obj = get_object_or_404(
+                self.related_model,
+                subscriber=request.user,
+                **{self.model_field: instance}
+            )
+
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
