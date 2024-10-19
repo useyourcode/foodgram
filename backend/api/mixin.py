@@ -2,8 +2,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 
-from recipes.models import Recipe
-
 
 class AddRemoveMixin:
     serializer_class = None
@@ -12,10 +10,10 @@ class AddRemoveMixin:
 
     def add_to_list(self, request, pk):
         context = {"request": request}
-        recipe = get_object_or_404(Recipe, id=pk)
+        instance = get_object_or_404(self.model, id=pk)
         data = {
             'user': request.user.id,
-            'recipe': recipe.id
+            'recipe': instance.id
         }
         serializer = self.serializer_class(data=data, context=context)
         serializer.is_valid(raise_exception=True)
@@ -23,11 +21,11 @@ class AddRemoveMixin:
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def remove_from_list(self, request, pk):
-        recipe = get_object_or_404(Recipe, id=pk)
+        instance = get_object_or_404(self.model, id=pk)
         obj = get_object_or_404(
             self.related_model,
             user=request.user,
-            recipe=recipe
+            instance=instance
         )
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

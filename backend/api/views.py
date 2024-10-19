@@ -40,7 +40,7 @@ from .serializers import (
 )
 
 
-class UserViewSet(UserViewSet):
+class UserViewSet(UserViewSet, AddRemoveMixin):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = CustomPagination
@@ -60,21 +60,13 @@ class UserViewSet(UserViewSet):
         permission_classes=(IsAuthenticatedOrReadOnly,)
     )
     def subscribe(self, request, id):
-        user = request.user
-        author = get_object_or_404(User, pk=id)
+        self.serializer_class = SubscribeListSerializer
+        self.model = User
+        self.related_model = Subscription
 
         if request.method == 'POST':
-            serializer = SubscribeListSerializer(
-                author, data=request.data, context={'request': request}
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save(subscriber=user, author=author)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        get_object_or_404(
-            Subscription, subscriber=user, author=author
-        ).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+            return self.add_to_list(request, id)
+        return self.remove_from_list(request, id)
 
     @action(detail=False, permission_classes=(IsAuthenticated,))
     def subscriptions(self, request):
