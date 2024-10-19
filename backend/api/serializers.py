@@ -2,7 +2,6 @@ import djoser.serializers
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers, status
-from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.reverse import reverse
@@ -111,7 +110,10 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
     def get_recipes(self, obj):
         request = self.context.get('request')
         limit = int(request.GET.get('recipes_limit', 0))
-        recipes = obj.author.recipes.all()[:limit] if limit else obj.author.recipes.all()
+        if limit:
+            recipes = obj.author.recipes.all()[:limit]
+        else:
+            recipes = obj.author.recipes.all()
         serializer = RecipeShortSerializer(recipes, many=True, read_only=True)
         return serializer.data
 
