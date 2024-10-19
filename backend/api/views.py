@@ -65,20 +65,19 @@ class UserViewSet(UserViewSet, AddRemoveMixin):
 
         if request.method == 'POST':
             serializer = SubscribeListSerializer(
-                data={'author': author},
+                data={'author': author.id},
                 context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
-            serializer.save(subscriber=user, author=author)
+            serializer.save(subscriber=user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            subscription = get_object_or_404(
+            get_object_or_404(
                 Subscription,
                 subscriber=user,
                 author=author
-            )
-            subscription.delete()
+            ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, permission_classes=(IsAuthenticated,))

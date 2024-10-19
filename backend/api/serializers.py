@@ -81,25 +81,23 @@ class SubscribeListSerializer(serializers.ModelSerializer):
         model = Subscription
         fields = (
             'author',
-            'author_username',
-            'author_email',
-            'recipes',
-            'recipes_count',
+            'subscriber',
         )
-        read_only_fields = ['author']
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Subscription.objects.all(),
-                fields=('subscriber', 'author'),
-                message='Вы уже подписаны на этого пользователя',
-            )
-        ]
+        read_only_fields = ('subscriber',)
 
-    def validate(self, author):
+    def validate_author(self, author):
         user = self.context['request'].user
+        subscription_exists = Subscription.objects.filter(
+            subscriber=user,
+            author=author
+        ).exists()
+        if subscription_exists:
+            raise serializers.ValidationError(
+                'Вы уже подписаны на этого автора.'
+            )
         if user == author:
             raise serializers.ValidationError(
-                'Нельзя подписаться на самого себя'
+                'Нельзя подписаться на самого себя.'
             )
         return author
 
