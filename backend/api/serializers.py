@@ -70,7 +70,10 @@ class UserCreateSerializer(djoser.serializers.UserCreateSerializer):
 
 
 class SubscribeListSerializer(djoser.serializers.UserSerializer):
-    author_username = serializers.CharField(source='author.username', read_only=True)
+    author_username = serializers.CharField(
+        source='author.username',
+        read_only=True
+    )
     author_email = serializers.CharField(source='author.email', read_only=True)
     recipes_count = SerializerMethodField()
     recipes = SerializerMethodField()
