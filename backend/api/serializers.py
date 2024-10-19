@@ -69,7 +69,7 @@ class UserCreateSerializer(djoser.serializers.UserCreateSerializer):
                 'last_name', 'avatar')
 
 
-class SubscribeListSerializer(djoser.serializers.UserSerializer):
+class SubscribeListSerializer(serializers.ModelSerializer):
     author_username = serializers.CharField(
         source='author.username',
         read_only=True
@@ -94,20 +94,17 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         author_id = request.parser_context.get('kwargs').get('id')
         author = get_object_or_404(User, id=author_id)
         user = request.user
-        is_subscribed = Subscription.objects.filter(
+        if Subscription.objects.filter(
             subscriber=user,
             author=author
-        ).exists()
-        if is_subscribed:
-            raise serializers.ValidationError(
-                'Вы уже подписаны',
-                code=status.HTTP_400_BAD_REQUEST
-            )
+        ).exists():
+            raise serializers.ValidationError('Вы уже подписаны')
 
         if user == author:
             raise serializers.ValidationError(
-                'Ты не можешь подписаться на себя'
+                'Нельзя подписаться на самого себя'
             )
+
         return data
 
     def get_recipes_count(self, obj):
@@ -116,10 +113,7 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
     def get_recipes(self, obj):
         request = self.context.get('request')
         limit = int(request.GET.get('recipes_limit', 0))
-        if limit:
-            recipes = obj.recipes.all()[:limit]
-        else:
-            recipes = obj.recipes.all()
+        recipes = obj.recipes.all()[:limit] if limit else obj.recipes.all()
         serializer = RecipeShortSerializer(recipes, many=True, read_only=True)
         return serializer.data
 

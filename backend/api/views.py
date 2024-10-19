@@ -65,11 +65,7 @@ class UserViewSet(UserViewSet, AddRemoveMixin):
         self.model_field = 'author'
 
         if request.method == 'POST':
-            try:
-                return self.add_to_list(request, id)
-            except Exception as e:
-                print(f"Error during subscription: {e}")  # Логируем ошибку
-                raise
+            return self.add_to_list(request, id)
         return self.remove_from_list(request, id)
 
     @action(detail=False, permission_classes=(IsAuthenticated,))
