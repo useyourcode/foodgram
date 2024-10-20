@@ -1,7 +1,6 @@
 import djoser.serializers
 from drf_extra_fields.fields import Base64ImageField
-from django.shortcuts import get_object_or_404
-from rest_framework import serializers, status
+from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.reverse import reverse

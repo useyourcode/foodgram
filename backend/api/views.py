@@ -10,7 +10,6 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
 from recipes.make_pdf import make_pdf_file
