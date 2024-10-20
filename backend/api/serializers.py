@@ -69,57 +69,37 @@ class UserCreateSerializer(djoser.serializers.UserCreateSerializer):
                 'last_name', 'avatar')
 
 
-class SubscribeListSerializer(djoser.serializers.UserSerializer):
-    author_username = serializers.CharField(
-        source='author.username',
-        read_only=True
+class SubscribeListSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='email',
+        default=serializers.CurrentUserDefault(),
     )
-    author_email = serializers.CharField(source='author.email', read_only=True)
-    recipes_count = serializers.SerializerMethodField()
-    recipes = serializers.SerializerMethodField()
+    author = serializers.SlugRelatedField(
+        slug_field='email',
+        queryset=User.objects.all(),
+    )
 
     class Meta:
         model = Subscription
-        fields = (
-            'author',
-            'author_username',
-            'author_email',
-            'recipes',
-            'recipes_count',
-        )
-        read_only_fields = ['author']
-
-    def validate(self, data):
-        request = self.context['request']
-        author_id = request.parser_context.get('kwargs').get('id')
-        author = get_object_or_404(User, id=author_id)
-        user = request.user
-        is_subscribed = Subscription.objects.filter(
-            subscriber=user,
-            author=author
-        ).exists()
-        if is_subscribed:
-            raise serializers.ValidationError(
-                'Вы уже подписаны',
-                code=status.HTTP_400_BAD_REQUEST
+        fields = ('author', 'user')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=model.objects.all(),
+                fields=('author', 'user'),
+                message='Вы уже подписаны на этого пользователя',
             )
+        ]
 
-        if user == author:
+    def validate_author(self, author):
+        if self.context['request'].user == author:
             raise serializers.ValidationError(
-                'Ты не можешь подписаться на себя'
+                'Нельзя подписаться на самого себя'
             )
-        return data
+        return author
 
-    def get_recipes_count(self, obj):
-        return obj.author.recipes.count()
-
-    def get_recipes(self, obj):
-        request = self.context.get('request')
-        limit = int(request.GET.get('recipes_limit', 0))
-        recipes = (obj.author.recipes.all()[:limit]
-                   if limit else obj.author.recipes.all())
-        serializer = RecipeShortSerializer(recipes, many=True, read_only=True)
-        return serializer.data
+    def to_representation(self, instance):
+        return UserSerializer(instance.author, context=self.context).data
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):

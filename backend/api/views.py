@@ -60,25 +60,14 @@ class UserViewSet(UserViewSet, AddRemoveMixin):
         permission_classes=(IsAuthenticatedOrReadOnly,)
     )
     def subscribe(self, request, id):
-        user = request.user
-        author = get_object_or_404(User, pk=id)
+        self.serializer_class = SubscribeListSerializer
+        self.model = User
+        self.related_model = Subscription
+        self.model_field = 'author'
 
         if request.method == 'POST':
-            serializer = SubscribeListSerializer(
-                data={'author': author.id},
-                context={'request': request}
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save(subscriber=user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            get_object_or_404(
-                Subscription,
-                subscriber=user,
-                author=author
-            ).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return self.add_to_list(request, id)
+        return self.remove_from_list(request, id)
 
     @action(detail=False, permission_classes=(IsAuthenticated,))
     def subscriptions(self, request):
@@ -184,7 +173,9 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
         self.model = Recipe
         self.related_model = ShopList
         self.model_field = 'recipe'
-        return self.add_to_list(request, pk)
+        if request.method == 'POST':
+            return self.add_to_list(request, pk)
+        return self.remove_from_list(request, pk)
 
     @shopping_cart.mapping.delete
     def destroy_shopping_cart(self, request, pk):
@@ -202,7 +193,9 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
         self.model = Recipe
         self.related_model = Favorite
         self.model_field = 'recipe'
-        return self.add_to_list(request, pk)
+        if request.method == 'POST':
+            return self.add_to_list(request, pk)
+        return self.remove_from_list(request, pk)
 
     @favorite.mapping.delete
     def destroy_favorite(self, request, pk):
