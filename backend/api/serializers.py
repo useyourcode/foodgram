@@ -69,7 +69,7 @@ class UserCreateSerializer(djoser.serializers.UserCreateSerializer):
 
 
 class SubscribeListSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(
+    subscriber = serializers.SlugRelatedField(
         read_only=True,
         slug_field='email',
         default=serializers.CurrentUserDefault(),
@@ -81,17 +81,17 @@ class SubscribeListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subscription
-        fields = ('author', 'user')
+        fields = ('author', 'subscriber')
         validators = [
             UniqueTogetherValidator(
                 queryset=model.objects.all(),
-                fields=('author', 'user'),
+                fields=('author', 'subscriber'),
                 message='Вы уже подписаны на этого пользователя',
             )
         ]
 
     def validate_author(self, author):
-        if self.context['request'].user == author:
+        if self.context['request'].subscriber == author:
             raise serializers.ValidationError(
                 'Нельзя подписаться на самого себя'
             )
@@ -275,12 +275,12 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = (
-            'recipe', 'user'
+            'recipe', 'subscriber'
         )
         model = Favorite
 
     def validate(self, data):
-        user = data['user']
+        user = self.context['request'].user
         if user.favorites.filter(recipe=data['recipe']).exists():
             raise serializers.ValidationError(
                 'Рецепт уже добавлен в избранное.'
@@ -298,12 +298,12 @@ class ShopListSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = (
-            'recipe', 'user'
+            'recipe', 'subscriber'
         )
         model = ShopList
 
     def validate(self, data):
-        user = data['user']
+        user = self.context['request'].user
         if user.shopping_list.filter(recipe=data['recipe']).exists():
             raise serializers.ValidationError(
                 'Рецепт уже добавлен'
