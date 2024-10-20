@@ -91,7 +91,7 @@ class SubscribeListSerializer(serializers.ModelSerializer):
         ]
 
     def validate_author(self, author):
-        if self.context['request'].subscriber == author:
+        if self.context['request'].user == author:
             raise serializers.ValidationError(
                 'Нельзя подписаться на самого себя'
             )
@@ -275,7 +275,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = (
-            'recipe', 'subscriber'
+            'recipe', 'user'
         )
         model = Favorite
 
@@ -298,7 +298,7 @@ class ShopListSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = (
-            'recipe', 'subscriber'
+            'recipe', 'user'
         )
         model = ShopList
 

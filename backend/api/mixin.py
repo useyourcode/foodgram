@@ -12,9 +12,10 @@ class AddRemoveMixin:
     def add_to_list(self, request, pk):
         context = {"request": request}
         instance = get_object_or_404(self.model, id=pk)
+        user = self.context['request'].user
         if self.model_field == 'author':
             data = {
-                'subscriber': request.user.id,
+                'subscriber': user.id,
                 self.model_field: instance.id
             }
             serializer = self.serializer_class(data=data, context=context)
@@ -22,7 +23,7 @@ class AddRemoveMixin:
             serializer.save(subscriber=request.user, author=instance)
         else:
             data = {
-                'subscriber': request.user.id,
+                'user': request.user.id,
                 self.model_field: instance.id
             }
             serializer = self.serializer_class(data=data, context=context)
@@ -33,15 +34,17 @@ class AddRemoveMixin:
 
     def remove_from_list(self, request, pk):
         instance = get_object_or_404(self.model, id=pk)
+        user = self.context['request'].user
         if hasattr(self.related_model, 'user'):
             obj = get_object_or_404(
                 self.related_model,
-                subscriber=request.user,
+                user=user,
                 **{self.model_field: instance}
             )
         else:
             obj = get_object_or_404(
                 self.related_model,
+                subscriber=user,
                 **{self.model_field: instance}
             )
         obj.delete()
