@@ -75,7 +75,7 @@ class SubscribeListSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(),
     )
     author = serializers.SlugRelatedField(
-        slug_field='email',
+        slug_field='id',
         queryset=User.objects.all(),
     )
 
