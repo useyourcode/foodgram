@@ -22,7 +22,7 @@ class AddRemoveMixin:
             serializer.save(subscriber=request.user, author=instance)
         else:
             data = {
-                'user': request.user.id,
+                'subscriber': request.user.id,
                 self.model_field: instance.id
             }
             serializer = self.serializer_class(data=data, context=context)
