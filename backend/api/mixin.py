@@ -36,15 +36,13 @@ class AddRemoveMixin:
         if hasattr(self.related_model, 'user'):
             obj = get_object_or_404(
                 self.related_model,
-                user=request.user,
+                subscriber=request.user,
                 **{self.model_field: instance}
             )
         else:
             obj = get_object_or_404(
                 self.related_model,
-                subscriber=request.user,
                 **{self.model_field: instance}
             )
-
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
