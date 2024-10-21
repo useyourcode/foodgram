@@ -5,11 +5,19 @@ from recipes.models import Ingredient, Recipe, Tag
 
 class IngredientFilter(filters.FilterSet):
 
-    name = filters.CharFilter(lookup_expr='istartswith')
+    name__startswith = filters.CharFilter(
+        field_name='name',
+        lookup_expr='istartswith'
+    )
+
+    name__contains = filters.CharFilter(
+        field_name='name',
+        lookup_expr='icontains'
+    )
 
     class Meta:
         model = Ingredient
-        fields = ('name', )
+        fields = ['name__startswith', 'name__contains']
 
 
 class RecipeFilter(filters.FilterSet):
@@ -27,24 +35,18 @@ class RecipeFilter(filters.FilterSet):
         model = Recipe
         fields = ['tags', 'author', 'is_favorited', 'is_in_shopping_cart']
 
-    def filter_by_user_favorites(self, queryset, name, value):
-        if value and self.request.user.is_authenticated:
-            return queryset.filter(favorites__user=self.request.user)
-        return queryset
+    def filter_by_user_favorites(self, queryset, name, value): 
+        return self.filter_by_user_relationship(queryset, value, 'favorites')
 
     def filter_by_user_shopping_cart(self, queryset, name, value):
-        if value and self.request.user.is_authenticated:
-            return queryset.filter(shopping_list__user=self.request.user)
-        return queryset
-
-    def filter_by_user_relationship(
-            self,
+        return self.filter_by_user_relationship(
             queryset,
             value,
-            relationship,
-            field='subscriber'
-    ):
+            'shopping_list'
+        )
+
+    def filter_by_user_relationship(self, queryset, value, relationship):
         if value and self.request.user.is_authenticated:
-            filter_key = f'{relationship}__{field}'
+            filter_key = f'{relationship}__user'
             return queryset.filter(**{filter_key: self.request.user})
         return queryset
