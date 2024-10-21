@@ -278,7 +278,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = (
-            'recipe', 'user'
+            'recipe', 'subscriber'
         )
         model = Favorite
 
@@ -301,7 +301,7 @@ class ShopListSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = (
-            'recipe', 'user'
+            'recipe', 'subscriber'
         )
         model = ShopList
 
