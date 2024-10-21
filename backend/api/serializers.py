@@ -72,7 +72,7 @@ class UserCreateSerializer(djoser.serializers.UserCreateSerializer):
 
 
 class SubscribeListSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(
+    subscriber = serializers.SlugRelatedField(
         read_only=True,
         slug_field='email',
         default=serializers.CurrentUserDefault(),
@@ -84,7 +84,7 @@ class SubscribeListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subscription
-        fields = ('author', 'user')
+        fields = ('author', 'subscriber')
         validators = [
             UniqueTogetherValidator(
                 queryset=model.objects.all(),
