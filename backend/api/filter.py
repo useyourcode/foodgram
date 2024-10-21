@@ -39,6 +39,6 @@ class RecipeFilter(filters.FilterSet):
 
     def filter_by_user_relationship(self, queryset, value, relationship):
         if value and self.request.user.is_authenticated:
-            filter_key = f'{relationship}__subscriber'
+            filter_key = f'{relationship}__user'
             return queryset.filter(**{filter_key: self.request.user})
         return queryset
