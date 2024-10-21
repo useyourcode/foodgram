@@ -17,7 +17,7 @@ class IngredientFilter(filters.FilterSet):
 
     class Meta:
         model = Ingredient
-        fields = ['name__startswith', 'name__contains']
+        fields = ['name']
 
 
 class RecipeFilter(filters.FilterSet):
@@ -35,7 +35,7 @@ class RecipeFilter(filters.FilterSet):
         model = Recipe
         fields = ['tags', 'author', 'is_favorited', 'is_in_shopping_cart']
 
-    def filter_by_user_favorites(self, queryset, name, value): 
+    def filter_by_user_favorites(self, queryset, name, value):
         return self.filter_by_user_relationship(queryset, value, 'favorites')
 
     def filter_by_user_shopping_cart(self, queryset, name, value):
