@@ -42,7 +42,7 @@ class RecipeFilter(filters.FilterSet):
             queryset,
             value,
             relationship,
-            field='user'
+            field='subscriber'
     ):
         if value and self.request.user.is_authenticated:
             filter_key = f'{relationship}__{field}'
