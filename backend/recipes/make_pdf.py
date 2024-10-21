@@ -76,7 +76,7 @@ def make_pdf_file(ingredients, recipes, request):
     for ingredient in ingredients:
         name = ingredient['name']
         unit = ingredient['unit']
-        amount = ingredient['amount']
+        amount = ingredient['total_amount']
         pdf.cell(
             0, 6,
             f"{name} ({unit}) - {amount}",

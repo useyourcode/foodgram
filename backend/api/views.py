@@ -79,7 +79,9 @@ class UserViewSet(UserViewSet):
         url_name='subscriptions',
     )
     def subscriptions(self, request):
-        page = self.paginate_queryset(self.get_queryset())
+        user = request.user
+        queryset = Subscription.objects.filter(subscriber=user)
+        page = self.paginate_queryset(queryset)
         serializer = SubscribeListSerializer(
             page, many=True, context={'request': request}
         )
@@ -88,7 +90,7 @@ class UserViewSet(UserViewSet):
     @subscribe.mapping.delete
     def unsubscribe(self, request, id):
         subscriber_deleted, _ = Subscription.objects.filter(
-            author=self.get_object(), user=request.user
+            author=self.get_object(), subscriber=request.user
         ).delete()
 
         if subscriber_deleted == 0:
