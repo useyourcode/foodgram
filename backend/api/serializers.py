@@ -20,8 +20,8 @@ MIN_COOKING_TIME = 1
 MAX_COOKING_TIME = 2880
 
 
-class UserSerializer(djoser.serializers.UserSerializer):
-    is_subscribed = SerializerMethodField(read_only=True)
+class UserSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -35,10 +35,14 @@ class UserSerializer(djoser.serializers.UserSerializer):
         ]
 
     def get_is_subscribed(self, obj):
-        request = self.context.get('request')
-        if request.user.is_anonymous:
-            return False
-        return obj.subscriptions.filter(id=request.user.id).exists()
+        current_user = self.context.get('request').user
+        if hasattr(obj, 'subs'):
+            return bool(obj.subs and obj.subs[0].is_subscribed)
+        return (
+            current_user.is_authenticated
+            and current_user != obj
+            and obj.subscribers.filter(user=current_user).exists()
+        )
 
 
 class AvatarSerializer(serializers.ModelSerializer):
@@ -69,23 +73,23 @@ class UserCreateSerializer(djoser.serializers.UserCreateSerializer):
 
 
 class SubscribeListSerializer(serializers.ModelSerializer):
-    subscriber = serializers.SlugRelatedField(
+    user = serializers.SlugRelatedField(
         read_only=True,
         slug_field='email',
         default=serializers.CurrentUserDefault(),
     )
     author = serializers.SlugRelatedField(
-        slug_field='id',
+        slug_field='email',
         queryset=User.objects.all(),
     )
 
     class Meta:
         model = Subscription
-        fields = ('author', 'subscriber')
+        fields = ('author', 'user')
         validators = [
             UniqueTogetherValidator(
                 queryset=model.objects.all(),
-                fields=('author', 'subscriber'),
+                fields=('author', 'user'),
                 message='Вы уже подписаны на этого пользователя',
             )
         ]

@@ -39,44 +39,61 @@ from .serializers import (
 )
 
 
-class UserViewSet(UserViewSet, AddRemoveMixin):
+class UserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = CustomPagination
 
     @action(
-        methods=('get',),
+        methods=['get'],
         detail=False,
-        permission_classes=(IsAuthenticatedOrReadOnly,)
+        permission_classes=[IsAuthenticatedOrReadOnly],
+        url_name='self',
     )
-    def get_self_page(self, request):
+    def get_self_page(self, request, *args, **kwargs):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
         detail=True,
-        methods=['POST', 'DELETE'],
-        permission_classes=(IsAuthenticatedOrReadOnly,)
+        methods=['post'],
+        permission_classes=[IsAuthenticatedOrReadOnly],
+        url_path='subscribe',
+        url_name='subscribe',
     )
     def subscribe(self, request, id):
-        self.serializer_class = SubscribeListSerializer
-        self.model = User
-        self.related_model = Subscription
-        self.model_field = 'author'
-
-        if request.method == 'POST':
-            return self.add_to_list(request, id)
-        return self.remove_from_list(request, id)
-
-    @action(detail=False, permission_classes=(IsAuthenticated,))
-    def subscriptions(self, request):
-        user = request.user
-        queryset = User.objects.filter(subscribers__subscriber=user)
-        pages = self.paginate_queryset(queryset)
+        author = self.get_object()
         serializer = SubscribeListSerializer(
-            pages, many=True, context={'request': request}
+            data={'author': author.id},
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(subscriber=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(
+        methods=['get'],
+        detail=False,
+        permission_classes=[IsAuthenticated],
+        url_path='subscriptions',
+        url_name='subscriptions',
+    )
+    def subscriptions(self, request):
+        page = self.paginate_queryset(self.get_queryset())
+        serializer = SubscribeListSerializer(
+            page, many=True, context={'request': request}
         )
         return self.get_paginated_response(serializer.data)
+
+    @subscribe.mapping.delete
+    def unsubscribe(self, request, id):
+        subscriber_deleted, _ = Subscription.objects.filter(
+            author=self.get_object(), user=request.user
+        ).delete()
+
+        if subscriber_deleted == 0:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         methods=['put'],
@@ -91,12 +108,15 @@ class UserViewSet(UserViewSet, AddRemoveMixin):
 
     @avatar.mapping.delete
     def delete_avatar(self, request):
-        data = {'avatar': None}
-        self._change_avatar(request.user, data)
+        data = request.data
+        if 'avatar' not in data:
+            data = {'avatar': None}
+        self._change_avatar(data)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def _change_avatar(self, user, data):
-        serializer = AvatarSerializer(user, data=data, partial=True)
+    def _change_avatar(self, data):
+        instance = self.get_instance()
+        serializer = AvatarSerializer(instance, data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return serializer
@@ -165,7 +185,7 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
 
     @action(
         detail=True,
-        methods=('POST',),
+        methods=['post'],
         permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, pk):
         self.serializer_class = ShopListSerializer
