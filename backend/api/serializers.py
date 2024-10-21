@@ -101,7 +101,7 @@ class SubscribeListSerializer(serializers.ModelSerializer):
         return author
 
     def to_representation(self, instance):
-        return UserSerializer(instance, context=self.context).data
+        return UserSerializer(instance.author, context=self.context).data
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
