@@ -283,8 +283,8 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favorite
 
     def validate(self, data):
-        user = self.context['request'].user
-        if user.favorites.filter(recipe=data['recipe']).exists():
+        subscriber = self.context['request'].user
+        if subscriber.favorites.filter(recipe=data['recipe']).exists():
             raise serializers.ValidationError(
                 'Рецепт уже добавлен в избранное.'
             )
@@ -306,8 +306,8 @@ class ShopListSerializer(serializers.ModelSerializer):
         model = ShopList
 
     def validate(self, data):
-        user = self.context['request'].user
-        if user.shopping_list.filter(recipe=data['recipe']).exists():
+        subscriber = self.context['request'].user
+        if subscriber.shopping_list.filter(recipe=data['recipe']).exists():
             raise serializers.ValidationError(
                 'Рецепт уже добавлен'
             )
