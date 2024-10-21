@@ -232,3 +232,31 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def add_to_list(self, request, pk):
+        context = {"request": request}
+        instance = get_object_or_404(self.model, id=pk)
+        user = request.user
+        data = {
+            'subscriber': user.id,
+            self.model_field: instance.id
+        }
+
+        serializer = self.serializer_class(data=data, context=context)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def remove_from_list(self, request, pk):
+        instance = get_object_or_404(self.model, id=pk)
+        user = request.user
+
+        obj = get_object_or_404(
+            self.related_model,
+            subscriber=user,
+            **{self.model_field: instance}
+        )
+
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
