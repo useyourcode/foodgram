@@ -173,7 +173,7 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
         )
         return response
 
-    @action(detail=False, methods=['GET'])
+    @action(detail=False, methods=['get'])
     def download_shopping_cart(self, request):
         ingredients = ShopList.get_shopping_ingredients(request.user)
         pdf_file = make_pdf_file(ingredients, [], request)
@@ -192,9 +192,7 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
         self.model = Recipe
         self.related_model = ShopList
         self.model_field = 'recipe'
-        if request.method == 'POST':
-            return self.add_to_list(request, pk)
-        return self.remove_from_list(request, pk)
+        return self.add_to_list(request, pk)
 
     @shopping_cart.mapping.delete
     def destroy_shopping_cart(self, request, pk):
@@ -205,16 +203,14 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
 
     @action(
         detail=True,
-        methods=('POST',),
+        methods=('post',),
         permission_classes=[IsAuthenticated])
     def favorite(self, request, pk):
         self.serializer_class = FavoriteSerializer
         self.model = Recipe
         self.related_model = Favorite
         self.model_field = 'recipe'
-        if request.method == 'POST':
-            return self.add_to_list(request, pk)
-        return self.remove_from_list(request, pk)
+        return self.add_to_list(request, pk)
 
     @favorite.mapping.delete
     def destroy_favorite(self, request, pk):
