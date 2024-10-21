@@ -88,7 +88,7 @@ class SubscribeListSerializer(serializers.ModelSerializer):
         validators = [
             UniqueTogetherValidator(
                 queryset=model.objects.all(),
-                fields=('author', 'user'),
+                fields=('author', 'subscriber'),
                 message='Вы уже подписаны на этого пользователя',
             )
         ]

@@ -29,16 +29,22 @@ class RecipeFilter(filters.FilterSet):
 
     def filter_by_user_favorites(self, queryset, name, value):
         if value and self.request.user.is_authenticated:
-            return queryset.filter(favorites__subscriber=self.request.user)
+            return queryset.filter(favorites__user=self.request.user)
         return queryset
 
     def filter_by_user_shopping_cart(self, queryset, name, value):
         if value and self.request.user.is_authenticated:
-            return queryset.filter(shopping_list__subscriber=self.request.user)
+            return queryset.filter(shopping_list__user=self.request.user)
         return queryset
 
-    def filter_by_user_relationship(self, queryset, value, relationship):
+    def filter_by_user_relationship(
+            self,
+            queryset,
+            value,
+            relationship,
+            field='user'
+    ):
         if value and self.request.user.is_authenticated:
-            filter_key = f'{relationship}__subscriber'
+            filter_key = f'{relationship}__{field}'
             return queryset.filter(**{filter_key: self.request.user})
         return queryset
