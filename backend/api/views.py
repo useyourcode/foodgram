@@ -39,7 +39,7 @@ from .serializers import (
 )
 
 
-class UserViewSet(UserViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = CustomPagination
@@ -55,26 +55,34 @@ class UserViewSet(UserViewSet):
 
     @action(
         detail=True,
-        methods=['POST', 'DELETE'],
+        methods=['POST'],
         permission_classes=[IsAuthenticatedOrReadOnly],
     )
     def subscribe(self, request, id):
         user = request.user
         author = get_object_or_404(User, pk=id)
+        serializer = SubscribeListSerializer(
+            author, data=request.data, context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        Subscription.objects.create(subscriber=user, author=author)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if request.method == 'POST':
-            serializer = SubscribeListSerializer(
-                author, data=request.data, context={'request': request}
-            )
-            serializer.is_valid(raise_exception=True)
-            Subscription.objects.create(subscriber=user, author=author)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            get_object_or_404(
-                Subscription, subscriber=user, author=author
-            ).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+    @action(
+        detail=True,
+        methods=['DELETE'],
+        permission_classes=[IsAuthenticatedOrReadOnly],
+    )
+    def unsubscribe(self, request, id):
+        user = request.user
+        author = get_object_or_404(User, pk=id)
+        subscription = get_object_or_404(
+            Subscription,
+            subscriber=user,
+            author=author
+        )
+        subscription.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
