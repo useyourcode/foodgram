@@ -68,16 +68,14 @@ class UserViewSet(UserViewSet):
                 author, data=request.data, context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
-            Subscription.objects.create(subscriber=user, author=author)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        subscription = get_object_or_404(
-            Subscription,
-            subscriber=user,
-            author=author
-        )
-        subscription.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == 'DELETE':
+            get_object_or_404(
+                Subscription, subscriber=user, author=author
+            ).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,

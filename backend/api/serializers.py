@@ -15,7 +15,7 @@ from recipes.models import (
     ShopList,
     Tag
 )
-from users.models import User
+from users.models import User, Subscription
 from linklite.models import URL
 
 MIN_COOKING_TIME = 1
@@ -88,6 +88,16 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         read_only_fields = ('email', 'username',
                             'first_name', 'last_name')
 
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        limit = int(request.GET.get('recipes_limit', 0))
+        recipes = obj.recipes.all()[:limit] if limit else obj.recipes.all()
+        serializer = RecipeShortSerializer(recipes, many=True, read_only=True)
+        return serializer.data
+
     def validate(self, data):
         request = self.context.get('request')
         author_id = request.parser_context.get('kwargs').get('id')
@@ -106,15 +116,25 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
             )
         return data
 
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
-
-    def get_recipes(self, obj):
+    def create(self, validated_data):
         request = self.context.get('request')
-        limit = int(request.GET.get('recipes_limit', 0))
-        recipes = obj.recipes.all()[:limit] if limit else obj.recipes.all()
-        serializer = RecipeShortSerializer(recipes, many=True, read_only=True)
-        return serializer.data
+        author_id = self.context.get('kwargs').get('id')
+        author = get_object_or_404(User, id=author_id)
+        user = request.user
+
+        if user == author:
+            raise ValidationError('Вы не можете подписаться на себя.')
+
+        if Subscription.objects.filter(
+            subscriber=user, author=author
+        ).exists():
+            raise ValidationError('Вы уже подписаны на этого автора.')
+
+        subscription = Subscription.objects.create(
+            subscriber=user,
+            author=author
+        )
+        return subscription
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
