@@ -15,7 +15,7 @@ from recipes.models import (
     ShopList,
     Tag
 )
-from users.models import User, Subscription
+from users.models import User
 from linklite.models import URL
 
 MIN_COOKING_TIME = 1
