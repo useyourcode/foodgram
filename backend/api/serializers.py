@@ -249,7 +249,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
             if int(ingredient.get('amount', 0)) < 1:
                 raise serializers.ValidationError('Не добавили ингредиенты')
-        return ingredients 
+        return ingredients
 
     @staticmethod
     def add_tags_and_ingredients_to_recipe(recipe, tags, ingredients):
