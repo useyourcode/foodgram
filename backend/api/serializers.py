@@ -106,16 +106,6 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
             )
         return data
 
-    def create(self, validated_data=None):
-        subscriber = self.context['request'].user
-        author_id = self.context['request'].parser_context['kwargs']['id']
-        author = get_object_or_404(User, id=author_id)
-
-        return Subscription.objects.create(
-            subscriber=subscriber,
-            author=author
-        )
-
     def get_recipes_count(self, obj):
         return obj.recipes.count()
 
