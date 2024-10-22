@@ -122,8 +122,8 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         author_id = self.context.get('kwargs').get('id')
         author = get_object_or_404(User, id=author_id)
         user = request.user
-        print(f"User: {request.user}, Author ID: {author_id}")  # Проверяем, что данные передаются
-        print(f"Validated data: {validated_data}") 
+        print(f"User: {request.user}, Author ID: {author_id}")
+        print(f"Validated data: {validated_data}")
 
         if user == author:
             raise ValidationError('Вы не можете подписаться на себя.')
@@ -137,7 +137,7 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
             subscriber=user,
             author=author
         )
-        print(f"Subscription created: {subscription}") 
+        print(f"Subscription created: {subscription}")
         return subscription
 
 
