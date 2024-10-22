@@ -14,7 +14,7 @@ class AddRemoveMixin:
         instance = get_object_or_404(self.model, id=pk)
         user = request.user
         data = {
-            'subscriber': user.id,
+            'user': user.id,
             self.model_field: instance.id
         }
 
@@ -30,7 +30,7 @@ class AddRemoveMixin:
 
         obj = get_object_or_404(
             self.related_model,
-            subscriber=user,
+            user=user,
             **{self.model_field: instance}
         )
 
