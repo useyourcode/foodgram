@@ -236,8 +236,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 'Время готовки должно быть не больше 2 суток')
         return cooking_time
 
-    def validate_ingredients(self, data):
-        ingredients = data.get('ingredients')
+    def validate_ingredients(self, ingredients):
         ingredients_list = []
 
         for ingredient in ingredients:
@@ -250,7 +249,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
             if int(ingredient.get('amount', 0)) < 1:
                 raise serializers.ValidationError('Не добавили ингредиенты')
-        return data
+        return ingredients 
 
     @staticmethod
     def add_tags_and_ingredients_to_recipe(recipe, tags, ingredients):
