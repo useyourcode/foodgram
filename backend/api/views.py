@@ -55,27 +55,21 @@ class UserViewSet(UserViewSet):
 
     @action(
         detail=True,
-        methods=['POST'],
+        methods=['POST', 'DELETE'],
         permission_classes=[IsAuthenticatedOrReadOnly],
     )
     def subscribe(self, request, id):
         user = request.user
         author = get_object_or_404(User, pk=id)
-        serializer = SubscribeListSerializer(
-            author, data=request.data, context={'request': request}
-        )
-        serializer.is_valid(raise_exception=True)
-        Subscription.objects.create(subscriber=user, author=author)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(
-        detail=True,
-        methods=['DELETE'],
-        permission_classes=[IsAuthenticatedOrReadOnly],
-    )
-    def unsubscribe(self, request, id):
-        user = request.user
-        author = get_object_or_404(User, pk=id)
+        if request.method == 'POST':
+            serializer = SubscribeListSerializer(
+                author, data=request.data, context={'request': request}
+            )
+            serializer.is_valid(raise_exception=True)
+            Subscription.objects.create(subscriber=user, author=author)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         subscription = get_object_or_404(
             Subscription,
             subscriber=user,
