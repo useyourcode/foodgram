@@ -40,7 +40,7 @@ from .serializers import (
 )
 
 
-class UserViewSet(UserViewSet, AddRemoveMixin):
+class UserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = CustomPagination
@@ -132,7 +132,7 @@ class TagViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
     queryset = Recipe.objects.all()
     serializer_class = CreateRecipeSerializer
     permission_classes = (AuthorPermission,)
