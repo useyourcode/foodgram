@@ -15,7 +15,7 @@ from recipes.models import (
     ShopList,
     Tag
 )
-from users.models import User
+from users.models import User, Subscription
 from linklite.models import URL
 
 MIN_COOKING_TIME = 1
@@ -93,6 +93,7 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         author_id = request.parser_context.get('kwargs').get('id')
         author = get_object_or_404(User, id=author_id)
         user = request.user
+
         if user.subscriptions.filter(author=author_id).exists():
             raise ValidationError(
                 'Вы уже подписаны',
@@ -104,6 +105,16 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
                 code=status.HTTP_400_BAD_REQUEST
             )
         return data
+
+    def create(self, validated_data=None):
+        subscriber = self.context['request'].user
+        author_id = self.context['request'].parser_context['kwargs']['id']
+        author = get_object_or_404(User, id=author_id)
+
+        return Subscription.objects.create(
+            subscriber=subscriber,
+            author=author
+        )
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
