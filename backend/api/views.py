@@ -65,7 +65,8 @@ class UserViewSet(UserViewSet):
 
         if request.method == 'POST':
             serializer = SubscribeListSerializer(
-                author, data=request.data, context={'request': request, 'view': self}
+                author,
+                data=request.data, context={'request': request, 'view': self}
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
