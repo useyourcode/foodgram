@@ -12,7 +12,7 @@ load_dotenv()
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', '123')
 
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',')
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
