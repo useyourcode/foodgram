@@ -68,23 +68,31 @@ class UserViewSet(UserViewSet):
         author = get_object_or_404(User, pk=id)
 
         if request.method == 'POST':
-            # Логирование перед созданием подписки
             logger.info(f"Subscribing user {user.id} to author {author.id}")
 
             serializer = SubscribeListSerializer(
                 author,
                 data=request.data, context={'request': request, 'view': self}
             )
+
+            # Проверяем валидацию сериализатора
             if serializer.is_valid(raise_exception=True):
-                logger.debug("Serializer is valid")  # Л
-                serializer.save()
-                logger.info(f"Subscription crea{user.id} author {author.id}")
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+                logger.debug("Serializer is valid") 
+                serializer.save()  # Сохраняем подписку
+                logger.info(
+                    f"Subscription cr. for user {user.id} to aut. {author.id}")
+
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            logger.info(f"Unsubscrir {user.id} from author {author.id}")
+            # Логируем процесс отписки
+            logger.info(f"Unsubscribing {user.id} from author {author.id}")
+
+            # Удаляем подписку
             get_object_or_404(
                 Subscription, subscriber=user, author=author).delete()
+
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
