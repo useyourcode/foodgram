@@ -77,7 +77,7 @@ class UserViewSet(UserViewSet):
 
             # Проверяем валидацию сериализатора
             if serializer.is_valid(raise_exception=True):
-                logger.debug("Serializer is valid") 
+                logger.debug("Serializer is valid")
                 serializer.save()  # Сохраняем подписку
                 logger.info(
                     f"Subscription cr. for user {user.id} to aut. {author.id}")
