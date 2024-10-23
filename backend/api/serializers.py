@@ -119,25 +119,27 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
 
     def create(self, validated_data):
         request = self.context.get('request')
-        author_id = self.context.get('kwargs').get('id')
+        author_id = self.context.get('view').kwargs.get('id')
         author = get_object_or_404(User, id=author_id)
         user = request.user
-        print(f"User: {request.user}, Author ID: {author_id}")
-        print(f"Validated data: {validated_data}")
+
+        print(f"Creating subscription: user {user.id}, author {author.id}")
 
         if user == author:
+            print("Cannot subscribe to self")
             raise ValidationError('Вы не можете подписаться на себя.')
 
         if Subscription.objects.filter(
-            subscriber=user, author=author
-        ).exists():
+                subscriber=user, author=author).exists():
+            print("Already subscribed")  # Принт, если подписка уже существует
             raise ValidationError('Вы уже подписаны на этого автора.')
 
+        # Создание подписки
         subscription = Subscription.objects.create(
             subscriber=user,
             author=author
         )
-        print(f"Subscription created: {subscription}")
+        print(f"Subscription successfully created: {subscription.id}")
         return subscription
 
 

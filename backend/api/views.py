@@ -60,22 +60,26 @@ class UserViewSet(UserViewSet):
         permission_classes=[IsAuthenticatedOrReadOnly],
     )
     def subscribe(self, request, id):
+        print("Entering subscribe method")  # Добавьте этот принт
         user = request.user
         author = get_object_or_404(User, pk=id)
 
         if request.method == 'POST':
+            print(f"Subscribing user {user.id} to author {author.id}")
             serializer = SubscribeListSerializer(
                 author,
                 data=request.data, context={'request': request, 'view': self}
             )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            if serializer.is_valid(raise_exception=True):
+                print("Serializer is valid")
+                serializer.save()
+                print("Subscription created")  # Принт после создания подписки
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
+            print(f"Unsubscribing user {user.id} from author {author.id}")
             get_object_or_404(
-                Subscription, subscriber=user, author=author
-            ).delete()
+                Subscription, subscriber=user, author=author).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
