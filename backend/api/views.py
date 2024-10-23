@@ -43,6 +43,7 @@ import logging
 # Настраиваем логгер для текущего модуля
 logger = logging.getLogger(__name__)
 
+
 class UserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -71,7 +72,7 @@ class UserViewSet(UserViewSet):
             logger.info(f"Subscribing user {user.id} to author {author.id}")
 
             serializer = SubscribeListSerializer(
-                author, 
+                author,
                 data=request.data, context={'request': request, 'view': self}
             )
             if serializer.is_valid(raise_exception=True):
@@ -81,7 +82,7 @@ class UserViewSet(UserViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            logger.info(f"Unsubscribing user {user.id} from author {author.id}")
+            logger.info(f"Unsubscrir {user.id} from author {author.id}")
             get_object_or_404(
                 Subscription, subscriber=user, author=author).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
