@@ -38,7 +38,10 @@ from .serializers import (
     UserSerializer,
     LinkLiteSerializer,
 )
+import logging
 
+# Настраиваем логгер для текущего модуля
+logger = logging.getLogger(__name__)
 
 class UserViewSet(UserViewSet):
     queryset = User.objects.all()
@@ -60,24 +63,25 @@ class UserViewSet(UserViewSet):
         permission_classes=[IsAuthenticatedOrReadOnly],
     )
     def subscribe(self, request, id):
-        print("Entering subscribe method")  # Добавьте этот принт
         user = request.user
         author = get_object_or_404(User, pk=id)
 
         if request.method == 'POST':
-            print(f"Subscribing user {user.id} to author {author.id}")
+            # Логирование перед созданием подписки
+            logger.info(f"Subscribing user {user.id} to author {author.id}")
+
             serializer = SubscribeListSerializer(
-                author,
+                author, 
                 data=request.data, context={'request': request, 'view': self}
             )
             if serializer.is_valid(raise_exception=True):
-                print("Serializer is valid")
+                logger.debug("Serializer is valid")  # Л
                 serializer.save()
-                print("Subscription created")  # Принт после создания подписки
+                logger.info(f"Subscription crea{user.id} author {author.id}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            print(f"Unsubscribing user {user.id} from author {author.id}")
+            logger.info(f"Unsubscribing user {user.id} from author {author.id}")
             get_object_or_404(
                 Subscription, subscriber=user, author=author).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)

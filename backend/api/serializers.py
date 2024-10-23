@@ -17,6 +17,9 @@ from recipes.models import (
 )
 from users.models import User, Subscription
 from linklite.models import URL
+import logging
+
+logger = logging.getLogger(__name__)
 
 MIN_COOKING_TIME = 1
 MAX_COOKING_TIME = 2880
@@ -123,15 +126,16 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         author = get_object_or_404(User, id=author_id)
         user = request.user
 
-        print(f"Creating subscription: user {user.id}, author {author.id}")
+        # Логирование перед созданием подписки
+        logger.info(f"Creating subscrip {user.id}, author {author.id}")
 
         if user == author:
-            print("Cannot subscribe to self")
+            logger.warning("User tried to subscribe to themselves")
             raise ValidationError('Вы не можете подписаться на себя.')
 
         if Subscription.objects.filter(
                 subscriber=user, author=author).exists():
-            print("Already subscribed")  # Принт, если подписка уже существует
+            logger.warning(f"User {user.id}already subscribed to {author.id}")
             raise ValidationError('Вы уже подписаны на этого автора.')
 
         # Создание подписки
@@ -139,7 +143,8 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
             subscriber=user,
             author=author
         )
-        print(f"Subscription successfully created: {subscription.id}")
+
+        logger.info(f"Subscription successfully created: {subscription.id}")
         return subscription
 
 
