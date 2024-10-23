@@ -15,11 +15,9 @@ from recipes.models import (
     ShopList,
     Tag
 )
-from users.models import User, Subscription
+from users.models import User
 from linklite.models import URL
-import logging
 
-logger = logging.getLogger(__name__)
 
 MIN_COOKING_TIME = 1
 MAX_COOKING_TIME = 2880
@@ -91,23 +89,11 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
         read_only_fields = ('email', 'username',
                             'first_name', 'last_name')
 
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
-
-    def get_recipes(self, obj):
-        request = self.context.get('request')
-        limit = int(request.GET.get('recipes_limit', 0))
-        recipes = obj.recipes.all()[:limit] if limit else obj.recipes.all()
-        serializer = RecipeShortSerializer(recipes, many=True, read_only=True)
-        return serializer.data
-
     def validate(self, data):
         request = self.context.get('request')
-        author_id = self.context.get('view').kwargs.get('id')
+        author_id = request.parser_context.get('kwargs').get('id')
         author = get_object_or_404(User, id=author_id)
         user = request.user
-        print(f"Request data: {request.data}")
-        print(f"User: {request.user}, Author ID: {author_id}")
         if user.subscriptions.filter(author=author_id).exists():
             raise ValidationError(
                 'Вы уже подписаны',
@@ -120,32 +106,15 @@ class SubscribeListSerializer(djoser.serializers.UserSerializer):
             )
         return data
 
-    def create(self, validated_data):
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
+
+    def get_recipes(self, obj):
         request = self.context.get('request')
-        author_id = self.context.get('view').kwargs.get('id')
-        author = get_object_or_404(User, id=author_id)
-        user = request.user
-
-        # Логирование перед созданием подписки
-        logger.info(f"Creating subscrip {user.id}, author {author.id}")
-
-        if user == author:
-            logger.warning("User tried to subscribe to themselves")
-            raise ValidationError('Вы не можете подписаться на себя.')
-
-        if Subscription.objects.filter(
-                subscriber=user, author=author).exists():
-            logger.warning(f"User {user.id}already subscribed to {author.id}")
-            raise ValidationError('Вы уже подписаны на этого автора.')
-
-        # Создание подписки
-        subscription = Subscription.objects.create(
-            subscriber=user,
-            author=author
-        )
-
-        logger.info(f"Subscription successfully created: {subscription.id}")
-        return subscription
+        limit = int(request.GET.get('recipes_limit', 0))
+        recipes = obj.recipes.all()[:limit] if limit else obj.recipes.all()
+        serializer = RecipeShortSerializer(recipes, many=True, read_only=True)
+        return serializer.data
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
