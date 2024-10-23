@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 
 
 class UserViewSet(UserViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
     pagination_class = CustomPagination
 
@@ -77,10 +77,9 @@ class UserViewSet(UserViewSet):
                 data=request.data, context={'request': request, 'view': self}
             )
 
-            # Проверяем валидацию сериализатора
             if serializer.is_valid(raise_exception=True):
                 logger.debug("Serializer is valid")
-                serializer.save()  # Сохраняем подписку
+                serializer.save()
                 logger.info(
                     f"Subscription cr. for user {user.id} to aut. {author.id}")
 
@@ -88,10 +87,7 @@ class UserViewSet(UserViewSet):
                     serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            # Логируем процесс отписки
             logger.info(f"Unsubscribing {user.id} from author {author.id}")
-
-            # Удаляем подписку
             get_object_or_404(
                 Subscription, subscriber=user, author=author).delete()
 
