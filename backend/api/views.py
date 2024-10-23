@@ -62,6 +62,8 @@ class UserViewSet(UserViewSet):
         detail=True,
         methods=['POST', 'DELETE'],
         permission_classes=[IsAuthenticatedOrReadOnly],
+        url_path='subscribe',
+        url_name='subscribe',
     )
     def subscribe(self, request, id):
         user = request.user
