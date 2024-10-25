@@ -182,7 +182,6 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
         permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, pk):
         self.serializer_class = ShopListSerializer
-        pages = self.paginate_queryset(queryset)
         self.model = Recipe
         self.related_model = ShopList
         self.model_field = 'recipe'
