@@ -169,7 +169,6 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
     @action(detail=False, methods=['get'])
     def download_shopping_cart(self, request):
         ingredients = ShopList.get_shopping_ingredients(request.user)
-        self.pagination_class = None
         pdf_file = make_pdf_file(ingredients, [], request)
         return FileResponse(
             BytesIO(pdf_file),
@@ -183,6 +182,7 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
         permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, pk):
         self.serializer_class = ShopListSerializer
+        pages = self.paginate_queryset(queryset)
         self.model = Recipe
         self.related_model = ShopList
         self.model_field = 'recipe'
@@ -235,3 +235,19 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=(IsAuthenticated,),
+        url_path='cart'
+    )
+    def view_shopping_cart(self, request):
+        queryset = Recipe.objects.filter(shopping_list__user=request.user)
+        pages = self.paginate_queryset(queryset)
+        serializer = RecipeReadSerializer(
+            pages,
+            many=True,
+            context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
