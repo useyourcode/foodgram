@@ -169,6 +169,7 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
     @action(detail=False, methods=['get'])
     def download_shopping_cart(self, request):
         ingredients = ShopList.get_shopping_ingredients(request.user)
+        self.pagination_class = None
         pdf_file = make_pdf_file(ingredients, [], request)
         return FileResponse(
             BytesIO(pdf_file),

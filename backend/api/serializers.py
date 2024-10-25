@@ -15,7 +15,7 @@ from recipes.models import (
     ShopList,
     Tag
 )
-from users.models import User
+from users.models import User, Subscription
 from linklite.models import URL
 
 
@@ -71,7 +71,7 @@ class UserCreateSerializer(djoser.serializers.UserCreateSerializer):
                 'last_name', 'avatar')
 
 
-class SubscribeListSerializer(djoser.serializers.UserSerializer):
+class SubscribeListSerializer(serializers.ModelSerializer):
     recipes_count = SerializerMethodField()
     recipes = SerializerMethodField()
 
