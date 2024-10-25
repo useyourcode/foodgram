@@ -41,7 +41,7 @@ class UserSerializer(djoser.serializers.UserSerializer):
         request = self.context.get('request')
         if request.user.is_anonymous:
             return False
-        return obj.subscriptions.filter(id=request.user.id).exists()
+        return obj.subscribers.filter(subscriber=request.user).exists()
 
 
 class AvatarSerializer(serializers.ModelSerializer):
