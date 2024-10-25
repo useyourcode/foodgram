@@ -217,7 +217,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         if data["name"].strip().lower() == data["text"].strip().lower():
             raise serializers.ValidationError(
                 'Описание рецепта не должно совпадать с его названием.'
-        )
+            )
         if Recipe.objects.filter(
             text=data["text"]
         ).exclude(id=recipe_id).exists():
