@@ -213,11 +213,16 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         recipe_id = self.instance.id if self.instance else None
+
+        if data["name"].strip().lower() == data["text"].strip().lower():
+            raise serializers.ValidationError(
+                'Описание рецепта не должно совпадать с его названием.'
+        )
         if Recipe.objects.filter(
             text=data["text"]
         ).exclude(id=recipe_id).exists():
             raise serializers.ValidationError(
-                'Этот рецепт уже есть.'
+                'Рецепт с таким описанием уже существует.'
             )
         return data
 
