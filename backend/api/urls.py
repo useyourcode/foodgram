@@ -15,6 +15,4 @@ urlpatterns = [
     path('', include(router_v1.urls)),
     path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
-    path('cart/', RecipeViewSet.as_view({'get': 'view_shopping_cart'}),
-         name='view-shopping-cart'),
 ]

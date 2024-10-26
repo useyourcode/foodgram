@@ -234,19 +234,3 @@ class RecipeViewSet(viewsets.ModelViewSet, AddRemoveMixin):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(
-        detail=False,
-        methods=['get'],
-        permission_classes=(IsAuthenticated,),
-        url_path='cart'
-    )
-    def view_shopping_cart(self, request):
-        queryset = Recipe.objects.filter(shopping_list__user=request.user)
-        pages = self.paginate_queryset(queryset)
-        serializer = RecipeReadSerializer(
-            pages,
-            many=True,
-            context={'request': request}
-        )
-        return self.get_paginated_response(serializer.data)
